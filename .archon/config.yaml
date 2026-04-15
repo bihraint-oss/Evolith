@@ -1,0 +1,15 @@
+# Space Project Configuration
+# Inherits global settings from ~/.archon/config.yaml:
+#   - codex: gpt-5.4, reasoningEffort: xhigh
+#   - claude: redirected to GLM 5.1
+
+assistant: codex
+
+assistants:
+  codex:
+    model: gpt-5.4
+    modelReasoningEffort: xhigh
+
+defaults:
+  loadDefaultCommands: true
+  loadDefaultWorkflows: true
