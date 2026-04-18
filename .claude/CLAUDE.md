@@ -98,8 +98,9 @@ Update memory files automatically when any of these triggers fire:
 ## Project Context
 
 - **Type**: Greenfield MVP — AI-native capability evolution platform
-- **Tech Stack**: Bun + TypeScript (strict) + Hono + PostgreSQL + Drizzle ORM + React/Vite/Tailwind
+- **Tech Stack**: Bun + TypeScript (strict) + Hono + SQLite + Drizzle ORM + React/Vite/Tailwind
 - **PRD**: `.archon/ralph/evolith-mvp/prd.md`
+- **Current backend state**: Phase 1 foundation and the Phase 2 diagnosis loop are implemented; authenticated `/api/profile` diagnosis routes are curl-testable.
 - **Phase Order**: Phase 1 (Backend) → Phase 2+3 (parallel) → Phase 4 (Frontend)
 - **Constraint**: Backend-first, all APIs curl-testable before frontend work
 - **Constraint**: MVP quality for fundraising demo

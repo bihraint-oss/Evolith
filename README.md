@@ -1,6 +1,6 @@
-# Evolith Phase 1 Backend
+# Evolith Phase 2 Backend
 
-Phase 1 provides a Bun workspace with a shared TypeScript package and a Hono API backed by SQLite + Drizzle. The current backend includes a health endpoint, deterministic skill-tree seeding, and curl-testable auth flows.
+Phase 2 provides a Bun workspace with a shared TypeScript package and a Hono API backed by SQLite + Drizzle. The current backend includes health and auth endpoints plus authenticated `/api/profile` diagnosis routes for starting, resuming, answering, and reviewing cognitive diagnosis sessions.
 
 ## Prerequisites
 
@@ -72,7 +72,13 @@ LOGIN_RESPONSE=$(curl -sS \
 printf '%s\n' "$LOGIN_RESPONSE"
 ```
 
-Extract the refresh token from the login response:
+Extract the access token and refresh token from the login response:
+
+```bash
+ACCESS_TOKEN=$(printf '%s' "$LOGIN_RESPONSE" | bun -e 'const input = await new Response(Bun.stdin.stream()).text(); const json = JSON.parse(input); console.log(json.data.tokens.accessToken);')
+
+printf '%s\n' "$ACCESS_TOKEN"
+```
 
 ```bash
 REFRESH_TOKEN=$(printf '%s' "$LOGIN_RESPONSE" | bun -e 'const input = await new Response(Bun.stdin.stream()).text(); const json = JSON.parse(input); console.log(json.data.tokens.refreshToken);')
@@ -115,6 +121,60 @@ curl -i -sS \
   -H "content-type: application/json" \
   -d '{"refreshToken":"not-a-real-token"}'
 ```
+
+## Profile & Diagnosis Smoke Test
+
+Fetch the authenticated profile:
+
+```bash
+curl -sS \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  "$API_URL/profile"
+```
+
+Start or resume a diagnosis session:
+
+```bash
+START_RESPONSE=$(curl -sS \
+  -X POST "$API_URL/profile/diagnosis/start" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "content-type: application/json" \
+  -d '{}')
+
+printf '%s\n' "$START_RESPONSE"
+```
+
+Extract the session id:
+
+```bash
+SESSION_ID=$(printf '%s' "$START_RESPONSE" | bun -e 'const input = await new Response(Bun.stdin.stream()).text(); const json = JSON.parse(input); console.log(json.data.session.id);')
+
+printf '%s\n' "$SESSION_ID"
+```
+
+Submit the first answer:
+
+```bash
+curl -sS \
+  -X POST "$API_URL/profile/diagnosis/$SESSION_ID/answer" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "content-type: application/json" \
+  -d '{"choiceId":"sequenced"}'
+```
+
+Inspect the session and profile again:
+
+```bash
+curl -sS \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  "$API_URL/profile/diagnosis/$SESSION_ID"
+
+curl -sS \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  "$API_URL/profile"
+```
+
+Repeat `POST /api/profile/diagnosis/$SESSION_ID/answer` with the current question's `choiceId` until the session returns `"state":"completed"`.
 
 All API responses use one of these envelopes:
 

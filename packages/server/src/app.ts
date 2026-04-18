@@ -7,6 +7,7 @@ import { errorResponse } from "./lib/http";
 import { createLogger, createRequestLogger } from "./lib/logger";
 import { createAuthRouter } from "./routes/auth";
 import { createHealthRouter } from "./routes/health";
+import { createProfileRouter } from "./routes/profile";
 
 export interface AppDependencies {
   db?: AppDatabase;
@@ -61,6 +62,14 @@ export function createApp(dependencies: AppDependencies = {}): Hono {
     app.route(
       "/api",
       createAuthRouter({
+        db: dependencies.db,
+        tokenService: dependencies.tokenService,
+      }),
+    );
+
+    app.route(
+      "/api",
+      createProfileRouter({
         db: dependencies.db,
         tokenService: dependencies.tokenService,
       }),

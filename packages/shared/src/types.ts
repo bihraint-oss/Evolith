@@ -78,24 +78,33 @@ export interface UserProgress {
   score: number | null;
 }
 
+export type DiagnosisQuestionChoiceScores = Partial<CognitiveDimensionScores>;
+
 export interface DiagnosisQuestionChoice {
   id: string;
   label: string;
-  value: number;
 }
 
 export interface DiagnosisQuestion {
   id: EntityId;
   prompt: string;
-  dimensionIds: CognitiveDimension[];
   choices: DiagnosisQuestionChoice[];
 }
 
-export type DiagnosisAnswerValue = number | string | string[];
+export interface DiagnosisQuestionSnapshotChoice extends DiagnosisQuestionChoice {
+  scores: DiagnosisQuestionChoiceScores;
+}
+
+export interface DiagnosisQuestionSnapshot {
+  id: EntityId;
+  prompt: string;
+  dimensionIds: CognitiveDimension[];
+  choices: DiagnosisQuestionSnapshotChoice[];
+}
 
 export interface DiagnosisAnswer {
   questionId: EntityId;
-  value: DiagnosisAnswerValue;
+  choiceId: string;
   answeredAt: IsoTimestampString;
 }
 
@@ -103,13 +112,58 @@ export interface DiagnosisSession {
   id: EntityId;
   userId: EntityId;
   state: DiagnosisSessionState;
-  questions: DiagnosisQuestion[];
+  questions: DiagnosisQuestionSnapshot[];
   answers: DiagnosisAnswer[];
   profileSnapshot: CognitiveDimensionScores | null;
   completedAt: IsoTimestampString | null;
   createdAt: IsoTimestampString;
   updatedAt: IsoTimestampString;
 }
+
+export interface DiagnosisProgress {
+  totalQuestions: number;
+  answeredQuestions: number;
+  remainingQuestions: number;
+  completionPercentage: number;
+}
+
+export interface DiagnosisRadarDatum {
+  dimension: CognitiveDimension;
+  value: number;
+}
+
+export type DiagnosisRadarData = DiagnosisRadarDatum[];
+
+export interface DiagnosisResult {
+  scores: CognitiveDimensionScores;
+  radar: DiagnosisRadarData;
+}
+
+export interface DiagnosisSessionViewBase {
+  id: EntityId;
+  state: DiagnosisSessionState;
+  progress: DiagnosisProgress;
+  createdAt: IsoTimestampString;
+  updatedAt: IsoTimestampString;
+}
+
+export interface InProgressDiagnosisSessionView extends DiagnosisSessionViewBase {
+  state: "inProgress";
+  currentQuestion: DiagnosisQuestion;
+  result: null;
+  completedAt: null;
+}
+
+export interface CompletedDiagnosisSessionView extends DiagnosisSessionViewBase {
+  state: "completed";
+  currentQuestion: null;
+  result: DiagnosisResult;
+  completedAt: IsoTimestampString;
+}
+
+export type DiagnosisSessionView =
+  | InProgressDiagnosisSessionView
+  | CompletedDiagnosisSessionView;
 
 export interface ApiSuccessResponse<TData> {
   data: TData;
@@ -169,4 +223,36 @@ export interface AuthResponse {
 
 export interface RefreshResponse {
   tokens: AuthTokens;
+}
+
+export type GetProfileRequest = Record<string, never>;
+
+export interface GetProfileResponse {
+  profile: CognitiveProfile;
+  hasCompletedDiagnosis: boolean;
+  lastDiagnosedAt: IsoTimestampString | null;
+  radar: DiagnosisRadarData | null;
+}
+
+export type StartDiagnosisRequest = Record<string, never>;
+
+export interface StartDiagnosisResponse {
+  session: InProgressDiagnosisSessionView;
+}
+
+export interface GetDiagnosisSessionRequest {
+  id: EntityId;
+}
+
+export interface GetDiagnosisSessionResponse {
+  session: DiagnosisSessionView;
+}
+
+export interface AnswerDiagnosisRequest {
+  id: EntityId;
+  choiceId: string;
+}
+
+export interface AnswerDiagnosisResponse {
+  session: DiagnosisSessionView;
 }
