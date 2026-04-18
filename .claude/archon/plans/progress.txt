@@ -1,3 +1,9 @@
+## Task 10: UPDATE README with local runbook and `curl` verification — COMPLETED
+Date: 2026-04-18
+Files: README.md
+Commit: fb2741a
+---
+
 ## Task 9: CREATE automated smoke tests — COMPLETED
 Date: 2026-04-18
 Files: packages/server/src/app.test.ts, packages/server/src/db/seed.test.ts
