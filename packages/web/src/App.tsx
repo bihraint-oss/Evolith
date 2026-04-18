@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import { AuthProvider, useAuth } from "./auth/auth-context";
 import AuthPage from "./routes/AuthPage";
+import DiagnosisPage from "./routes/DiagnosisPage";
 import {
   resolveRouteRedirect,
   type AppRoutePath,
@@ -35,11 +36,7 @@ function AppRoutes() {
         path="/diagnosis"
         element={
           <GuardedRoute routePath="/diagnosis">
-            <RoutePreview
-              description="Diagnosis routing now waits for profile bootstrap before rendering, so the upcoming Q&A page can resume or start the server-side session without redirect flicker."
-              eyebrow="Route /diagnosis"
-              title="Diagnosis is reserved for authenticated users who still need scoring."
-            />
+            <DiagnosisPage />
           </GuardedRoute>
         }
       />
