@@ -2,8 +2,8 @@
 
 **Last updated**: 2026-04-19
 **Current phase**: Phase 4 In Progress
-**Current focus**: Phase 4 now has the authenticated dashboard surface in place, so the next implementation step is adding Bun-native frontend unit coverage for the API client refresh flow, route decisions, and skill grouping transforms
-**Next steps**: Complete Phase 4 Task 9 by creating `packages/web/src/lib/api-client.test.ts`, `routing.test.ts`, and `skills.test.ts`, then verify the pure frontend helpers through the root `bun run test` path before the final documentation/memory sweep
+**Current focus**: Phase 4 now has Bun-native frontend helper coverage wired into the repo test entrypoint, so the remaining implementation work is the final documentation and memory sweep for Task 10
+**Next steps**: Complete Phase 4 Task 10 by updating `README.md`, `.claude/memory/PROGRESS.md`, and `.claude/memory/INDEX.md` for the full frontend runbook and final validation guidance, then run `bun run validate && bun run build`
 
 ---
 
@@ -20,13 +20,13 @@
 
 ## Project State Summary
 
-- **Repo**: Phase 1 backend foundation, Phase 2 diagnosis core loop, and Phase 3 skill graph API are implemented; Phase 4 now has workspace plumbing, repo-wide browser typecheck coverage, a buildable Vite web scaffold, the shared frontend auth/API/routing/skill helper layer under `packages/web/src/lib`, a bootstrapped `AuthProvider` with centralized route guarding, the real `/auth` register/login screen, a server-driven `/diagnosis` route that starts or resumes sessions and refreshes `/api/profile` on completion, and a real `/dashboard` route that renders the backend radar plus all seeded skills grouped by dimension with status badges
+- **Repo**: Phase 1 backend foundation, Phase 2 diagnosis core loop, and Phase 3 skill graph API are implemented; Phase 4 now has workspace plumbing, repo-wide browser typecheck coverage, a buildable Vite web scaffold, the shared frontend auth/API/routing/skill helper layer under `packages/web/src/lib`, a bootstrapped `AuthProvider` with centralized route guarding, the real `/auth` register/login screen, a server-driven `/diagnosis` route that starts or resumes sessions and refreshes `/api/profile` on completion, a real `/dashboard` route that renders the backend radar plus all seeded skills grouped by dimension with status badges, and Bun-native frontend unit tests that now run through the normal root `bun run test` path
 - **Branch**: `archon/task-plan-phase4-frontend`
 - **PRD**: Validated at `.archon/ralph/evolith-mvp/prd.md`
 - **Archon config**: Codex (gpt-5.4 xhigh) for dev-time AI
 - **Database**: SQLite + Drizzle on Bun
 - **Dependencies**: Installed
-- **Latest completed task**: Phase 4 Task 8 — created the frontend `/dashboard` screen with radar rendering from `profile.radar`, authenticated `/api/skills` loading, grouped skill sections, and color-coded `locked` / `available` / `inProgress` / `completed` badges
+- **Latest completed task**: Phase 4 Task 9 — added frontend helper tests for API transport/auth refresh, route decisions, and skill grouping, then updated the repo test entrypoint so the web suite runs alongside the server suite
 
 ## Phase Status
 

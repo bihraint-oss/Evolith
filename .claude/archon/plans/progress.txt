@@ -1,3 +1,9 @@
+## Task 9: CREATE `packages/web/src/lib/api-client.test.ts`, `routing.test.ts`, and `skills.test.ts` — COMPLETED
+Date: 2026-04-19
+Files: packages/web/src/lib/api-client.test.ts, packages/web/src/lib/routing.test.ts, packages/web/src/lib/skills.test.ts, packages/server/package.json
+Commit: be3cf0e
+---
+
 ## Task 8: CREATE `packages/web/src/routes/DashboardPage.tsx`, `components/StatusBadge.tsx`, `components/RadarChartCard.tsx`, and `components/SkillGroupSection.tsx` — COMPLETED
 Date: 2026-04-19
 Files: packages/web/src/routes/DashboardPage.tsx, packages/web/src/components/StatusBadge.tsx, packages/web/src/components/RadarChartCard.tsx, packages/web/src/components/SkillGroupSection.tsx, packages/web/src/App.tsx

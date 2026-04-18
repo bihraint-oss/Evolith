@@ -27,6 +27,7 @@ _Non-obvious patterns, gotchas, and conventions discovered during implementation
 - Bun workspaces: `packages/server`, `packages/web`, `packages/shared`
 - Shared types in `packages/shared/src/types.ts`
 - Import pattern: `import type { ... } from '@evolith/shared'`
+- `packages/server/package.json` should invoke `bun test ../../packages/server/src ../../packages/web/src`; when Bun is launched from `packages/server`, a bare `bun test` does not pick up the frontend helper tests under `packages/web`.
 
 ### Database Conventions
 - Table prefix: none (unlike Archon's `remote_agent_` prefix)
