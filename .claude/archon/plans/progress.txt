@@ -1,3 +1,9 @@
+## Task 9: CREATE automated smoke tests — COMPLETED
+Date: 2026-04-18
+Files: packages/server/src/app.test.ts, packages/server/src/db/seed.test.ts
+Commit: e9f382b
+---
+
 ## Task 8: CREATE auth routes and transactional registration flow — COMPLETED
 Date: 2026-04-18
 Files: packages/server/src/routes/auth.ts, packages/server/src/app.ts, packages/server/src/index.ts, packages/server/src/lib/auth/tokens.ts
