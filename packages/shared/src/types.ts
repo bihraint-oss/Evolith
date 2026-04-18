@@ -70,9 +70,6 @@ export interface SkillNode {
 
 export interface SkillNodeView extends SkillNode {
   status: UserProgressStatus;
-  startedAt: IsoTimestampString | null;
-  completedAt: IsoTimestampString | null;
-  score: number | null;
 }
 
 export interface UserProgress {

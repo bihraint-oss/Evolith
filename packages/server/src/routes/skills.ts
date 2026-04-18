@@ -116,9 +116,6 @@ function toSkillNodeView(
       completedSkillIds,
       hasCompletedDiagnosis,
     ),
-    startedAt: progressRow?.startedAt ?? null,
-    completedAt: progressRow?.completedAt ?? null,
-    score: progressRow?.score ?? null,
   };
 }
 

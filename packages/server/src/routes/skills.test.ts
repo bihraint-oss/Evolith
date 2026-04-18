@@ -181,6 +181,12 @@ function findSkill(skills: SkillNodeView[], skillId: string): SkillNodeView {
   return skill;
 }
 
+function expectStatusOnlySkillView(skill: SkillNodeView): void {
+  expect("startedAt" in skill).toBe(false);
+  expect("completedAt" in skill).toBe(false);
+  expect("score" in skill).toBe(false);
+}
+
 function completeDiagnosisForUser(
   context: TestAppContext,
   userId: string,
@@ -251,15 +257,16 @@ describe("skills routes", () => {
       expect(result.body.data.skills.map((skill) => skill.id)).toEqual(expectedSkillIds);
 
       rootSkillIds.forEach((skillId) => {
-        expect(findSkill(result.body.data.skills, skillId).status).toBe("locked");
+        const rootSkill = findSkill(result.body.data.skills, skillId);
+
+        expect(rootSkill.status).toBe("locked");
+        expectStatusOnlySkillView(rootSkill);
       });
 
       const lockedSkill = findSkill(result.body.data.skills, lockedSkillId);
 
       expect(lockedSkill.status).toBe("locked");
-      expect(lockedSkill.startedAt).toBeNull();
-      expect(lockedSkill.completedAt).toBeNull();
-      expect(lockedSkill.score).toBeNull();
+      expectStatusOnlySkillView(lockedSkill);
     } finally {
       context.cleanup();
     }
@@ -279,6 +286,8 @@ describe("skills routes", () => {
       expect(result.response.status).toBe(200);
       expect(rootSkill.status).toBe("available");
       expect(lockedSkill.status).toBe("locked");
+      expectStatusOnlySkillView(rootSkill);
+      expectStatusOnlySkillView(lockedSkill);
     } finally {
       context.cleanup();
     }
@@ -296,9 +305,7 @@ describe("skills routes", () => {
 
       expect(result.response.status).toBe(200);
       expect(unlockedSkill.status).toBe("locked");
-      expect(unlockedSkill.startedAt).toBeNull();
-      expect(unlockedSkill.completedAt).toBeNull();
-      expect(unlockedSkill.score).toBeNull();
+      expectStatusOnlySkillView(unlockedSkill);
     } finally {
       context.cleanup();
     }
@@ -317,9 +324,7 @@ describe("skills routes", () => {
 
       expect(result.response.status).toBe(200);
       expect(availableSkill.status).toBe("available");
-      expect(availableSkill.startedAt).toBeNull();
-      expect(availableSkill.completedAt).toBeNull();
-      expect(availableSkill.score).toBeNull();
+      expectStatusOnlySkillView(availableSkill);
     } finally {
       context.cleanup();
     }
@@ -359,13 +364,11 @@ describe("skills routes", () => {
 
       expect(result.response.status).toBe(200);
       expect(inProgressSkill.status).toBe("inProgress");
-      expect(inProgressSkill.startedAt).toBe("2026-04-19T01:00:00.000Z");
-      expect(inProgressSkill.completedAt).toBeNull();
-      expect(inProgressSkill.score).toBe(48);
       expect(completedSkill.status).toBe("completed");
-      expect(completedSkill.completedAt).toBe("2026-04-19T03:00:00.000Z");
-      expect(completedSkill.score).toBe(95);
       expect(dependentSkill.status).toBe("locked");
+      expectStatusOnlySkillView(inProgressSkill);
+      expectStatusOnlySkillView(completedSkill);
+      expectStatusOnlySkillView(dependentSkill);
     } finally {
       context.cleanup();
     }
@@ -381,6 +384,7 @@ describe("skills routes", () => {
       expect(result.response.status).toBe(200);
       expect(result.body.data.skill.id).toBe(lockedSkillId);
       expect(result.body.data.skill.status).toBe("locked");
+      expectStatusOnlySkillView(result.body.data.skill);
     } finally {
       context.cleanup();
     }
