@@ -13,8 +13,9 @@
 - [x] 2026-04-18: Backend foundation completed in the earlier implementation loop. See `.claude/archon/plans/progress.txt` for the detailed task-by-task commit log.
 
 ## Phase 2: Diagnosis Core Loop
-**Status**: 🔄 In progress
+**Status**: ✅ Done
 
+- [x] 2026-04-19: Task 10 completed — added `packages/server/src/routes/profile.test.ts` with end-to-end coverage for auth guarding, profile pre-diagnosis state, diagnosis start/resume, invalid-choice and out-of-order answer rejection, completion persistence, re-diagnosis overwrite behavior, completed-session history retention, and ownership checks. Full validation now passes for the Phase 2 backend loop.
 - [x] 2026-04-18: Task 8 completed — updated `packages/server/src/app.ts` to mount `createProfileRouter` under the shared `/api` prefix whenever auth dependencies are present, making the authenticated profile and diagnosis endpoints reachable through `createApp`.
 - [x] 2026-04-18: Task 7 completed — created `packages/server/src/routes/profile.ts` with authenticated `/api/profile` and diagnosis lifecycle routes, sequential answer validation, and transactional completion that overwrites `cognitive_profiles`.
 - [x] 2026-04-18: Task 6 completed — added `packages/server/src/services/ai-provider.ts` as the interface-only placeholder for future product-time AI integrations without wiring it into the request path.
