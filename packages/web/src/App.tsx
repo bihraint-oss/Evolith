@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { AuthProvider, useAuth } from "./auth/auth-context";
+import DashboardPage from "./routes/DashboardPage";
 import AuthPage from "./routes/AuthPage";
 import DiagnosisPage from "./routes/DiagnosisPage";
 import {
@@ -44,11 +45,7 @@ function AppRoutes() {
         path="/dashboard"
         element={
           <GuardedRoute routePath="/dashboard">
-            <RoutePreview
-              description="Completed users will land here once the dashboard components exist. The app shell already redirects incomplete profiles back to diagnosis before first paint."
-              eyebrow="Route /dashboard"
-              title="Dashboard access is now gated by the profile bootstrap state."
-            />
+            <DashboardPage />
           </GuardedRoute>
         }
       />
@@ -133,65 +130,5 @@ function FullscreenShell({ title, description }: FullscreenShellProps) {
         </section>
       </main>
     </div>
-  );
-}
-
-interface RoutePreviewProps {
-  title: string;
-  description: string;
-  eyebrow: string;
-}
-
-function RoutePreview({ title, description, eyebrow }: RoutePreviewProps) {
-  const { authStatus, profile, tokens } = useAuth();
-  const activeUser = profile === null ? "Anonymous" : profile.profile.userId;
-  const diagnosisStatus =
-    profile === null
-      ? "Profile unavailable"
-      : profile.hasCompletedDiagnosis
-        ? "Diagnosis complete"
-        : "Diagnosis pending";
-
-  return (
-    <main className="app-shell">
-      <section className="hero card">
-        <p className="hero-kicker">{eyebrow}</p>
-        <h1>{title}</h1>
-        <p className="hero-copy">{description}</p>
-        <div className="hero-actions">
-          <span className="pill">Auth: {authStatus}</span>
-          <span className="pill">Session: {tokens === null ? "empty" : "stored"}</span>
-          <span className="pill">Profile: {diagnosisStatus}</span>
-        </div>
-      </section>
-
-      <section className="panel-grid">
-        <article className="card panel-card">
-          <p className="panel-eyebrow">Current user</p>
-          <h2>{activeUser}</h2>
-          <p>
-            The authenticated profile payload only exposes cognitive-profile
-            fields, so route guards depend on server truth instead of a second
-            client-side user record.
-          </p>
-        </article>
-        <article className="card panel-card">
-          <p className="panel-eyebrow">Bootstrap source</p>
-          <h2>/api/profile</h2>
-          <p>
-            Diagnosis completion comes from the authenticated profile response,
-            not from local assumptions or duplicated client-side flags.
-          </p>
-        </article>
-        <article className="card panel-card">
-          <p className="panel-eyebrow">Next step</p>
-          <h2>Feature UI</h2>
-          <p>
-            The upcoming route components can focus on forms and data rendering
-            because auth persistence and redirect decisions now live above them.
-          </p>
-        </article>
-      </section>
-    </main>
   );
 }
