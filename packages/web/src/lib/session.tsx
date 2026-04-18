@@ -135,7 +135,6 @@ export const sessionStore = {
     };
   },
   getSession(): StoredSession | null {
-    currentSession = readStoredSession();
     return currentSession;
   },
   setSession(session: StoredSession): void {
