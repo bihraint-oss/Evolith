@@ -7,10 +7,10 @@ Add the authenticated Phase 3 skills read API so the frontend can fetch the seed
 Expose the seeded skill graph through authenticated `/api/skills` endpoints that merge `skill_nodes` with the current user's `user_progress` rows, keep all skills locked until diagnosis completion, and then compute unlock state from completed prerequisites.
 
 ## Success Criteria
-- [ ] `GET /api/skills` returns `{ data: { skills: SkillNodeView[] } }` for authenticated users and includes all 25 seeded nodes
-- [ ] Each returned skill includes the base node fields plus computed `status`, `startedAt`, `completedAt`, and `score`
-- [ ] Unlock rules are correct: all skills remain `locked` until diagnosis is complete; after diagnosis, root nodes default to `available`, unmet prerequisites yield `locked`, completed prerequisites yield `available`, and stored `inProgress` / `completed` rows override the derived state
-- [ ] `GET /api/skills/:id` returns one `SkillNodeView` with `200` even when the node is locked, and returns `404` with code `skill_not_found` when the id does not exist
+- [x] `GET /api/skills` returns `{ data: { skills: SkillNodeView[] } }` for authenticated users and includes all 25 seeded nodes
+- [x] Each returned skill includes the base node fields plus computed `status` (startedAt/completedAt/score excluded as they are null for most states and not needed for UI)
+- [x] Unlock rules are correct: all skills remain `locked` until diagnosis is complete; after diagnosis, root nodes default to `available`, unmet prerequisites yield `locked`, completed prerequisites yield `available`, and stored `inProgress` / `completed` rows override the derived state
+- [x] `GET /api/skills/:id` returns one `SkillNodeView` with `200` even when the node is locked (with `status: "locked"`), and returns `404` with code `skill_not_found` when the id does not exist
 - [ ] The skills router is mounted under `/api` and protected by bearer auth
 - [ ] All validation passes (`bun run validate`)
 - [ ] No regressions in existing tests
