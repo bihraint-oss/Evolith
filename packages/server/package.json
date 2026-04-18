@@ -7,7 +7,7 @@
     "dev": "bun --watch src/index.ts",
     "typecheck": "if find ../../packages -type f \\( -name '*.ts' -o -name '*.tsx' \\) | grep -q .; then tsc --project ../../tsconfig.json --noEmit; else echo 'No TypeScript source files yet'; fi",
     "lint": "bun run typecheck",
-    "test": "if find ../../packages -type f \\( -name '*.test.ts' -o -name '*.test.tsx' -o -name '*.spec.ts' -o -name '*.spec.tsx' \\) | grep -q .; then bun test; else echo 'No tests yet'; fi",
+    "test": "if find ../../packages -type f \\( -name '*.test.ts' -o -name '*.test.tsx' -o -name '*.spec.ts' -o -name '*.spec.tsx' \\) | grep -q .; then bun test ../../packages/server/src ../../packages/web/src; else echo 'No tests yet'; fi",
     "format:check": "echo 'No formatter configured yet'",
     "db:generate": "drizzle-kit generate --config drizzle.config.ts",
     "db:migrate": "bun src/db/migrate.ts",
