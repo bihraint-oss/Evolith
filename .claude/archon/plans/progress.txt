@@ -1,3 +1,9 @@
+## Task 3: CREATE `packages/web` scaffold (`index.html`, `tsconfig.json`, `vite.config.ts`, `src/vite-env.d.ts`, `src/main.tsx`, `src/App.tsx`, `src/index.css`) — COMPLETED
+Date: 2026-04-19
+Files: packages/web/index.html, packages/web/tsconfig.json, packages/web/vite.config.ts, packages/web/src/vite-env.d.ts, packages/web/src/main.tsx, packages/web/src/App.tsx, packages/web/src/index.css
+Commit: 48db0b2
+---
+
 ## Task 2: UPDATE `tsconfig.json` — COMPLETED
 Date: 2026-04-19
 Files: tsconfig.json

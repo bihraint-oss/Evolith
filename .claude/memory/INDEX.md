@@ -2,8 +2,8 @@
 
 **Last updated**: 2026-04-19
 **Current phase**: Phase 4 In Progress
-**Current focus**: Phase 4 frontend setup now covers repo-wide browser typechecking after Task 2 expanded the root `tsconfig.json` for TSX, declarations, JSX, and DOM libs
-**Next steps**: Complete Phase 4 Task 3 by scaffolding the initial Vite web app in `packages/web` with `index.html`, package-local TS config, Vite proxying, and placeholder React entry files
+**Current focus**: Phase 4 now has the initial `packages/web` Vite scaffold, so the next implementation step is the shared frontend foundation layer for auth persistence, API transport, route resolution, and skill grouping
+**Next steps**: Complete Phase 4 Task 4 by creating `packages/web/src/lib/auth-session.ts`, `api-client.ts`, `routing.ts`, and `skills.ts`
 
 ---
 
@@ -20,13 +20,13 @@
 
 ## Project State Summary
 
-- **Repo**: Phase 1 backend foundation, Phase 2 diagnosis core loop, and Phase 3 skill graph API are implemented; Phase 4 now has workspace plumbing plus repo-wide browser typecheck coverage
+- **Repo**: Phase 1 backend foundation, Phase 2 diagnosis core loop, and Phase 3 skill graph API are implemented; Phase 4 now has workspace plumbing, repo-wide browser typecheck coverage, and a buildable Vite web scaffold under `packages/web`
 - **Branch**: `archon/task-plan-phase4-frontend`
 - **PRD**: Validated at `.archon/ralph/evolith-mvp/prd.md`
 - **Archon config**: Codex (gpt-5.4 xhigh) for dev-time AI
 - **Database**: SQLite + Drizzle on Bun
 - **Dependencies**: Installed
-- **Latest completed task**: Phase 4 Task 2 — updated the root `tsconfig.json` to include TSX and `.d.ts` files, `jsx: "react-jsx"`, and DOM libraries for browser code validation
+- **Latest completed task**: Phase 4 Task 3 — created the initial `packages/web` Vite scaffold with the HTML entrypoint, local TS config, `/api` proxy, Router bootstrap, placeholder app shell, and baseline frontend styling
 
 ## Phase Status
 
