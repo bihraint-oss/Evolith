@@ -15,6 +15,7 @@
 ## Phase 2: Diagnosis Core Loop
 **Status**: 🔄 In progress
 
+- [x] 2026-04-18: Task 2 completed — updated `packages/server/src/db/schema.ts` to add `diagnosis_sessions.state`, store scored `DiagnosisQuestionSnapshot[]` question JSON, and make `profileSnapshot` nullable in the Drizzle typing.
 - [x] 2026-04-18: Task 1 completed — updated `packages/shared/src/types.ts` with single-choice diagnosis DTOs, scored question snapshot types, shared session/result/progress views, and radar data contracts.
 
 ## Phase 3: Skill Graph API

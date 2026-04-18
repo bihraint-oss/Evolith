@@ -2,8 +2,8 @@
 
 **Last updated**: 2026-04-18
 **Current phase**: Phase 2 In Progress
-**Current focus**: Phase 2 diagnosis schema and persistence updates after the shared DTO refactor
-**Next steps**: Add `diagnosis_sessions.state` and updated JSON typings in the server schema, generate the matching migration/meta files, then implement the diagnosis service and profile routes
+**Current focus**: Phase 2 migration generation for the diagnosis session schema update
+**Next steps**: Generate the migration and metadata for `diagnosis_sessions.state`, then implement the diagnosis service and profile routes
 
 ---
 
@@ -26,7 +26,7 @@
 - **Archon config**: Codex (gpt-5.4 xhigh) for dev-time AI
 - **Database**: SQLite + Drizzle on Bun
 - **Dependencies**: Installed
-- **Latest completed task**: Shared diagnosis contract update in `packages/shared/src/types.ts`
+- **Latest completed task**: Diagnosis session schema update in `packages/server/src/db/schema.ts`
 
 ## Phase Status
 
