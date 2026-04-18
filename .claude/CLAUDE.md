@@ -58,6 +58,43 @@ Update memory files automatically when any of these triggers fire:
 - `.claude/` is tracked in git (NOT gitignored) — this is intentional
 - `.claude/memory/` is the sync channel — it IS the product, not a side effect
 
+## Git Safety (Project Protection)
+
+**Goal: The project must NEVER be in an unrecoverable state.**
+
+### Commit Frequency
+- Commit after completing each subtask (not just at end of session)
+- Every code change that compiles = a commit candidate
+- Memory changes get their own `memory:` commit immediately
+
+### Branch Strategy
+- `main`: stable, always deployable. Only merge via PR from `dev`
+- `dev`: working branch. All feature work happens here
+- Feature branches: `feat/<name>` from `dev`, merge back to `dev`
+- **NEVER** force push to `main` or `dev`
+- **NEVER** run `git clean -fd` or `git reset --hard` without explicit user approval
+
+### Before Risky Operations
+- Create a safety branch first: `git branch safety/<name>`
+- This ensures there's always a rollback point
+
+### What Gets Committed
+- All source code (packages/)
+- Memory files (.claude/memory/) — with `memory:` prefix
+- Config files (tsconfig, drizzle config, etc.)
+- Migrations (packages/server/src/db/migrations/)
+
+### What NEVER Gets Committed
+- `.env` files (secrets)
+- `node_modules/`
+- Build output (`dist/`)
+- Database files (`*.db`)
+
+### Recovery
+- If something breaks: `git log --oneline -20` to find last good commit
+- `git revert <hash>` to undo (safe, preserves history)
+- Safety branches can be merged back if needed
+
 ## Project Context
 
 - **Type**: Greenfield MVP — AI-native capability evolution platform
