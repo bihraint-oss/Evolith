@@ -68,35 +68,69 @@ describe("diagnosis service", () => {
     const currentQuestion = getCurrentDiagnosisQuestion(questionSnapshots, answers);
     const progress = getDiagnosisProgress(questionSnapshots, answers);
 
-    expect(currentQuestion).toEqual({
-      id: "diagnosis-q3",
-      prompt:
-        "How do you approach an AI workflow that spans research, drafting, and verification?",
-      choices: [
-        {
-          id: "single-call",
-          label: "Use one model call and hope it handles the full workflow.",
-        },
-        {
-          id: "partial-split",
-          label: "Separate one handoff but keep most of the flow implicit.",
-        },
-        {
-          id: "staged-flow",
-          label: "Define stages, tool roles, and checkpoints for each handoff.",
-        },
-        {
-          id: "orchestrated-loop",
-          label:
-            "Design a full orchestration loop with specialists, verification, and retries.",
-        },
-      ],
-    });
+    expect(currentQuestion?.id).toBe("diagnosis-q3");
+    expect(currentQuestion?.choices.map((choice) => choice.id)).toEqual([
+      "single-call",
+      "partial-split",
+      "staged-flow",
+      "orchestrated-loop",
+    ]);
     expect(progress).toEqual({
       totalQuestions: 6,
       answeredQuestions: 2,
       remainingQuestions: 4,
       completionPercentage: 33,
+    });
+  });
+
+  test("returns cloned diagnosis question snapshots on every call", () => {
+    const firstSnapshots = createDiagnosisQuestionSnapshots();
+    const secondSnapshots = createDiagnosisQuestionSnapshots();
+
+    firstSnapshots[0]!.prompt = "Mutated prompt";
+    firstSnapshots[0]!.dimensionIds.push("creativity");
+    firstSnapshots[0]!.choices[0]!.label = "Mutated label";
+    firstSnapshots[0]!.choices[0]!.scores.promptPrecision = 0;
+
+    expect(secondSnapshots[0]).toEqual({
+      id: "diagnosis-q1",
+      prompt:
+        "When a request is ambiguous, what is your default first move before asking AI to solve it?",
+      dimensionIds: ["promptPrecision", "systemDecomposition"],
+      choices: [
+        {
+          id: "one-shot",
+          label: "Ask for a full answer immediately and refine later.",
+          scores: {
+            promptPrecision: 20,
+            systemDecomposition: 10,
+          },
+        },
+        {
+          id: "brief",
+          label: "Write a short prompt with one broad success criterion.",
+          scores: {
+            promptPrecision: 45,
+            systemDecomposition: 35,
+          },
+        },
+        {
+          id: "structured",
+          label: "Define inputs, outputs, and constraints before prompting.",
+          scores: {
+            promptPrecision: 80,
+            systemDecomposition: 70,
+          },
+        },
+        {
+          id: "sequenced",
+          label: "Break the task into steps with explicit acceptance criteria.",
+          scores: {
+            promptPrecision: 100,
+            systemDecomposition: 95,
+          },
+        },
+      ],
     });
   });
 

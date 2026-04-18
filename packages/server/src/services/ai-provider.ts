@@ -1,6 +1,6 @@
 import type {
   CognitiveDimension,
-  DiagnosisQuestion,
+  DiagnosisQuestionSnapshot,
   SkillDifficulty,
 } from "@evolith/shared";
 
@@ -24,7 +24,7 @@ export interface DiagnosisQuestionGenerationRequest {
 }
 
 export interface DiagnosisQuestionGenerationResult {
-  questions: DiagnosisQuestion[];
+  questions: DiagnosisQuestionSnapshot[];
 }
 
 export interface SkillContentGenerationRequest {

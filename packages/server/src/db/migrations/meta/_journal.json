@@ -15,6 +15,13 @@
       "when": 1776526597163,
       "tag": "0001_wakeful_silverclaw",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1776537387915,
+      "tag": "0002_public_quasimodo",
+      "breakpoints": true
     }
   ]
 }

@@ -61,6 +61,10 @@ function toValidationMessage(error: z.ZodError): string {
     .join("; ");
 }
 
+function isMalformedJsonError(error: unknown): boolean {
+  return error instanceof SyntaxError;
+}
+
 async function parseJsonBody<TData>(
   context: Context,
   schema: z.ZodType<TData>,
@@ -69,7 +73,11 @@ async function parseJsonBody<TData>(
 
   try {
     payload = await context.req.json();
-  } catch {
+  } catch (error) {
+    if (!isMalformedJsonError(error)) {
+      throw error;
+    }
+
     return {
       success: false,
       response: errorResponse(
@@ -144,10 +152,10 @@ function findDiagnosisSessionById(
     .get();
 }
 
-function findInProgressDiagnosisSessionByUserId(
+function findInProgressDiagnosisSessionsByUserId(
   db: AppDatabase,
   userId: string,
-): DiagnosisSessionRow | undefined {
+): DiagnosisSessionRow[] {
   return db
     .select()
     .from(diagnosisSessions)
@@ -158,7 +166,25 @@ function findInProgressDiagnosisSessionByUserId(
       ),
     )
     .orderBy(desc(diagnosisSessions.updatedAt))
-    .get();
+    .limit(2)
+    .all();
+}
+
+function isDuplicateInProgressDiagnosisSessionError(error: unknown): boolean {
+  if (
+    typeof error !== "object" ||
+    error === null ||
+    !("code" in error) ||
+    !("message" in error)
+  ) {
+    return false;
+  }
+
+  return (
+    error.code === "SQLITE_CONSTRAINT_UNIQUE" &&
+    typeof error.message === "string" &&
+    error.message.includes("diagnosis_sessions.user_id")
+  );
 }
 
 function hasSequentialAnswers(
@@ -191,6 +217,36 @@ function buildCompletedDiagnosisResult(
     scores,
     radar: buildDiagnosisRadarData(scores),
   };
+}
+
+function getInvalidInProgressSessionResponse(
+  context: ProfileContext,
+  session: DiagnosisSessionRow,
+): Response | null {
+  if (
+    session.state === "inProgress" &&
+    !hasSequentialAnswers(session.questions, session.answers)
+  ) {
+    return errorResponse(
+      context,
+      "Diagnosis session answers are out of order",
+      409,
+      "answer_sequence_invalid",
+    );
+  }
+
+  return null;
+}
+
+function getDuplicateInProgressSessionResponse(
+  context: ProfileContext,
+): Response {
+  return errorResponse(
+    context,
+    "Multiple in-progress diagnosis sessions exist for this user",
+    409,
+    "diagnosis_session_conflict",
+  );
 }
 
 function toDiagnosisSessionView(
@@ -328,12 +384,27 @@ export function createProfileRouter(
       return profile;
     }
 
-    const existingSession = findInProgressDiagnosisSessionByUserId(
+    const existingSessions = findInProgressDiagnosisSessionsByUserId(
       dependencies.db,
       auth.userId,
     );
 
+    if (existingSessions.length > 1) {
+      return getDuplicateInProgressSessionResponse(context);
+    }
+
+    const existingSession = existingSessions[0];
+
     if (existingSession !== undefined) {
+      const invalidSessionResponse = getInvalidInProgressSessionResponse(
+        context,
+        existingSession,
+      );
+
+      if (invalidSessionResponse !== null) {
+        return invalidSessionResponse;
+      }
+
       const response: StartDiagnosisResponse = {
         session: toInProgressDiagnosisSessionView(existingSession),
       };
@@ -343,18 +414,52 @@ export function createProfileRouter(
 
     const sessionId = crypto.randomUUID();
 
-    dependencies.db
-      .insert(diagnosisSessions)
-      .values({
-        id: sessionId,
-        userId: auth.userId,
-        state: "inProgress",
-        questions: createDiagnosisQuestionSnapshots(),
-        answers: [],
-        profileSnapshot: null,
-        completedAt: null,
-      })
-      .run();
+    try {
+      dependencies.db
+        .insert(diagnosisSessions)
+        .values({
+          id: sessionId,
+          userId: auth.userId,
+          state: "inProgress",
+          questions: createDiagnosisQuestionSnapshots(),
+          answers: [],
+          profileSnapshot: null,
+          completedAt: null,
+        })
+        .run();
+    } catch (error) {
+      if (isDuplicateInProgressDiagnosisSessionError(error)) {
+        const conflictedSessions = findInProgressDiagnosisSessionsByUserId(
+          dependencies.db,
+          auth.userId,
+        );
+
+        if (conflictedSessions.length > 1) {
+          return getDuplicateInProgressSessionResponse(context);
+        }
+
+        const conflictedSession = conflictedSessions[0];
+
+        if (conflictedSession !== undefined) {
+          const invalidSessionResponse = getInvalidInProgressSessionResponse(
+            context,
+            conflictedSession,
+          );
+
+          if (invalidSessionResponse !== null) {
+            return invalidSessionResponse;
+          }
+
+          const response: StartDiagnosisResponse = {
+            session: toInProgressDiagnosisSessionView(conflictedSession),
+          };
+
+          return successResponse(context, response);
+        }
+      }
+
+      throw error;
+    }
 
     const createdSession = findDiagnosisSessionById(
       dependencies.db,
@@ -384,6 +489,15 @@ export function createProfileRouter(
 
     if (session instanceof Response) {
       return session;
+    }
+
+    const invalidSessionResponse = getInvalidInProgressSessionResponse(
+      context,
+      session,
+    );
+
+    if (invalidSessionResponse !== null) {
+      return invalidSessionResponse;
     }
 
     const response: GetDiagnosisSessionResponse = {
@@ -497,6 +611,18 @@ export function createProfileRouter(
           })
           .where(eq(cognitiveProfiles.userId, auth.userId))
           .run();
+
+        const updatedProfile = tx
+          .select({ id: cognitiveProfiles.id })
+          .from(cognitiveProfiles)
+          .where(eq(cognitiveProfiles.userId, auth.userId))
+          .get();
+
+        if (updatedProfile === undefined) {
+          throw new Error(
+            `Failed to update cognitive profile for user ${auth.userId}`,
+          );
+        }
       } else {
         tx.update(diagnosisSessions)
           .set({

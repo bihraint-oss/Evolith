@@ -29,6 +29,7 @@ import {
   diagnosisSessions,
 } from "../db/schema";
 import { createTokenService } from "../lib/auth/tokens";
+import { createDiagnosisQuestionSnapshots } from "../services/diagnosis";
 
 interface TestAppContext {
   app: ReturnType<typeof createApp>;
@@ -364,7 +365,7 @@ describe("profile diagnosis routes", () => {
     }
   });
 
-  test("rejects invalid choices and detects persisted out-of-order answers", async () => {
+  test("rejects invalid choices and surfaces persisted out-of-order sessions across diagnosis routes", async () => {
     const context = createTestAppContext();
 
     try {
@@ -398,6 +399,21 @@ describe("profile diagnosis routes", () => {
         .where(eq(diagnosisSessions.id, session.id))
         .run();
 
+      const corruptedFetchResponse = await getRequest(
+        context.app,
+        `/api/profile/diagnosis/${session.id}`,
+        user.accessToken,
+      );
+      const corruptedFetchBody =
+        await parseJson<ApiErrorResponse>(corruptedFetchResponse);
+      const corruptedResumeResponse = await postJson(
+        context.app,
+        "/api/profile/diagnosis/start",
+        {},
+        user.accessToken,
+      );
+      const corruptedResumeBody =
+        await parseJson<ApiErrorResponse>(corruptedResumeResponse);
       const outOfOrderResponse = await postJson(
         context.app,
         `/api/profile/diagnosis/${session.id}/answer`,
@@ -407,8 +423,178 @@ describe("profile diagnosis routes", () => {
       const outOfOrderBody =
         await parseJson<ApiErrorResponse>(outOfOrderResponse);
 
+      expect(corruptedFetchResponse.status).toBe(409);
+      expect(corruptedFetchBody.error.code).toBe("answer_sequence_invalid");
+
+      expect(corruptedResumeResponse.status).toBe(409);
+      expect(corruptedResumeBody.error.code).toBe("answer_sequence_invalid");
+
       expect(outOfOrderResponse.status).toBe(409);
       expect(outOfOrderBody.error.code).toBe("answer_sequence_invalid");
+    } finally {
+      context.cleanup();
+    }
+  });
+
+  test("returns 400 for malformed JSON body on answer submission", async () => {
+    const context = createTestAppContext();
+
+    try {
+      const user = await registerUser(context.app, "malformed-answer-body@example.com");
+      const started = await startDiagnosis(context.app, user.accessToken);
+      const session = expectInProgressSession(started.body.data.session);
+      const response = await context.app.request(
+        `/api/profile/diagnosis/${session.id}/answer`,
+        {
+          method: "POST",
+          headers: createHeaders(user.accessToken, "application/json"),
+          body: "{not valid json",
+        },
+      );
+      const body = await parseJson<ApiErrorResponse>(response);
+
+      expect(response.status).toBe(400);
+      expect(body.error.code).toBe("invalid_json");
+    } finally {
+      context.cleanup();
+    }
+  });
+
+  test("returns 400 for schema-invalid answer request bodies", async () => {
+    const context = createTestAppContext();
+
+    try {
+      const user = await registerUser(context.app, "invalid-answer-body@example.com");
+      const started = await startDiagnosis(context.app, user.accessToken);
+      const session = expectInProgressSession(started.body.data.session);
+      const invalidPayloads: unknown[] = [{}, { choiceId: 123 }, { choiceId: "   " }];
+
+      for (const payload of invalidPayloads) {
+        const response = await postJson(
+          context.app,
+          `/api/profile/diagnosis/${session.id}/answer`,
+          payload,
+          user.accessToken,
+        );
+        const body = await parseJson<ApiErrorResponse>(response);
+
+        expect(response.status).toBe(400);
+        expect(body.error.code).toBe("invalid_request_body");
+      }
+    } finally {
+      context.cleanup();
+    }
+  });
+
+  test("enforces one in-progress diagnosis session per user in the database", async () => {
+    const context = createTestAppContext();
+
+    try {
+      const user = await registerUser(context.app, "unique-in-progress@example.com");
+      await startDiagnosis(context.app, user.accessToken);
+
+      expect(() =>
+        context.dbClient.db
+          .insert(diagnosisSessions)
+          .values({
+            id: crypto.randomUUID(),
+            userId: user.userId,
+            state: "inProgress",
+            questions: createDiagnosisQuestionSnapshots(),
+            answers: [],
+            profileSnapshot: null,
+            completedAt: null,
+          })
+          .run(),
+      ).toThrow(/UNIQUE constraint failed: diagnosis_sessions\.user_id/);
+    } finally {
+      context.cleanup();
+    }
+  });
+
+  test("returns 409 when multiple in-progress diagnosis sessions exist for the same user", async () => {
+    const context = createTestAppContext();
+
+    try {
+      const user = await registerUser(context.app, "duplicate-in-progress@example.com");
+      await startDiagnosis(context.app, user.accessToken);
+
+      context.dbClient.sqlite.exec(
+        "DROP INDEX diagnosis_sessions_user_id_in_progress_unique;",
+      );
+
+      context.dbClient.db
+        .insert(diagnosisSessions)
+        .values({
+          id: crypto.randomUUID(),
+          userId: user.userId,
+          state: "inProgress",
+          questions: createDiagnosisQuestionSnapshots(),
+          answers: [],
+          profileSnapshot: null,
+          completedAt: null,
+        })
+        .run();
+
+      const response = await postJson(
+        context.app,
+        "/api/profile/diagnosis/start",
+        {},
+        user.accessToken,
+      );
+      const body = await parseJson<ApiErrorResponse>(response);
+
+      expect(response.status).toBe(409);
+      expect(body.error.code).toBe("diagnosis_session_conflict");
+    } finally {
+      context.cleanup();
+    }
+  });
+
+  test("returns a sanitized 500 when an in-progress session has no remaining question", async () => {
+    const context = createTestAppContext();
+
+    try {
+      const user = await registerUser(context.app, "corrupted-session@example.com");
+      const started = await startDiagnosis(context.app, user.accessToken);
+      const session = expectInProgressSession(started.body.data.session);
+      const storedSession = context.dbClient.db
+        .select()
+        .from(diagnosisSessions)
+        .where(eq(diagnosisSessions.id, session.id))
+        .get();
+
+      expect(storedSession).toBeDefined();
+
+      if (storedSession === undefined) {
+        throw new Error("Expected stored diagnosis session to exist.");
+      }
+
+      const answers = storedSession.questions.map((question) => ({
+        questionId: question.id,
+        choiceId: question.choices[0]!.id,
+        answeredAt: "2026-04-19T00:00:00.000Z",
+      }));
+
+      context.dbClient.db
+        .update(diagnosisSessions)
+        .set({
+          answers,
+          updatedAt: "2026-04-19 00:00:00",
+        })
+        .where(eq(diagnosisSessions.id, session.id))
+        .run();
+
+      const response = await getRequest(
+        context.app,
+        `/api/profile/diagnosis/${session.id}`,
+        user.accessToken,
+      );
+      const body = await parseJson<ApiErrorResponse>(response);
+
+      expect(response.status).toBe(500);
+      expect(body.error.code).toBe("internal_error");
+      expect(body.error.message).toBe("Internal server error");
     } finally {
       context.cleanup();
     }

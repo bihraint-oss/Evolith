@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `diagnosis_sessions_user_id_in_progress_unique` ON `diagnosis_sessions` (`user_id`) WHERE "diagnosis_sessions"."state" = 'inProgress';
