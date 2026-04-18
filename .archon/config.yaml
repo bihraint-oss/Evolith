@@ -1,7 +1,6 @@
-# Space Project Configuration
-# Inherits global settings from ~/.archon/config.yaml:
-#   - codex: gpt-5.4, reasoningEffort: xhigh
-#   - claude: redirected to GLM 5.1
+# Evolith Project Configuration
+# Mixed provider strategy: Codex (complex/building) + GLM (simple/reviewing)
+# Builder (Codex) ≠ Reviewer (GLM) — different models for different perspectives
 
 assistant: codex
 
@@ -9,6 +8,10 @@ assistants:
   codex:
     model: gpt-5.4
     modelReasoningEffort: xhigh
+  claude:
+    # Routes to GLM-5.1 via Anthropic API proxy (all Claude models → GLM-5.1)
+    # Used for: classification, review, validation, synthesis, reporting
+    model: sonnet
 
 defaults:
   loadDefaultCommands: true

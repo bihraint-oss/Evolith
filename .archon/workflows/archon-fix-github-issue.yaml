@@ -1,3 +1,4 @@
+# Mixed: Codex (build/investigate) + GLM (review/validate/report). Builder ≠ Reviewer.
 name: archon-fix-github-issue
 description: |
   Use when: User wants to FIX, RESOLVE, or IMPLEMENT a solution for a GitHub issue.
@@ -6,15 +7,14 @@ description: |
   NOT for: Comprehensive multi-agent reviews (use archon-issue-review-full),
            questions about issues, CI failures, PR reviews, general exploration.
 
-  Mixed provider: Codex for heavy thinking, GLM 5.1 (via Claude) for light tasks.
-
 nodes:
   # =================================================================
-  # PHASE 1: FETCH & CLASSIFY (GLM 5.1 — light tasks)
+  # PHASE 1: FETCH & CLASSIFY
   # =================================================================
 
   - id: extract-issue-number
     provider: claude
+    model: haiku
     prompt: |
       Find the GitHub issue number for this request.
 
@@ -39,6 +39,7 @@ nodes:
 
   - id: classify
     provider: claude
+    model: haiku
     prompt: |
       You are an issue classifier. Analyze the GitHub issue below and determine its type.
 
@@ -124,21 +125,23 @@ nodes:
     context: fresh
 
   # =================================================================
-  # PHASE 5: VALIDATE (Codex — verification)
+  # PHASE 5: VALIDATE (GLM — reviews!)
   # =================================================================
 
   - id: validate
-    provider: codex
+    provider: claude
+    model: sonnet
     command: archon-validate
     depends_on: [implement]
     context: fresh
 
   # =================================================================
-  # PHASE 6: CREATE DRAFT PR (Codex — needs understanding)
+  # PHASE 6: CREATE DRAFT PR (GLM — simpler task)
   # =================================================================
 
   - id: create-pr
-    provider: codex
+    provider: claude
+    model: sonnet
     prompt: |
       Create a draft pull request for the current branch.
 
@@ -174,17 +177,19 @@ nodes:
     context: fresh
 
   # =================================================================
-  # PHASE 7: REVIEW (Codex — deep analysis agents)
+  # PHASE 7: REVIEW (GLM — review/validate/report)
   # =================================================================
 
   - id: review-scope
-    provider: codex
+    provider: claude
+    model: sonnet
     command: archon-pr-review-scope
     depends_on: [create-pr]
     context: fresh
 
   - id: review-classify
     provider: claude
+    model: haiku
     prompt: |
       You are a PR review classifier. Analyze the PR scope and determine
       which review agents should run.
@@ -237,47 +242,53 @@ nodes:
         - run_docs_impact
         - reasoning
 
-  # Review agents — all Codex (deep analysis)
+  # Review agents — GLM reviews (Builder ≠ Reviewer)
   - id: code-review
-    provider: codex
+    provider: claude
+    model: sonnet
     command: archon-code-review-agent
     depends_on: [review-classify]
     context: fresh
 
   - id: error-handling
-    provider: codex
+    provider: claude
+    model: sonnet
     command: archon-error-handling-agent
     depends_on: [review-classify]
     when: "$review-classify.output.run_error_handling == 'true'"
     context: fresh
 
   - id: test-coverage
-    provider: codex
+    provider: claude
+    model: sonnet
     command: archon-test-coverage-agent
     depends_on: [review-classify]
     when: "$review-classify.output.run_test_coverage == 'true'"
     context: fresh
 
   - id: comment-quality
-    provider: codex
+    provider: claude
+    model: sonnet
     command: archon-comment-quality-agent
     depends_on: [review-classify]
     when: "$review-classify.output.run_comment_quality == 'true'"
     context: fresh
 
   - id: docs-impact
-    provider: codex
+    provider: claude
+    model: sonnet
     command: archon-docs-impact-agent
     depends_on: [review-classify]
     when: "$review-classify.output.run_docs_impact == 'true'"
     context: fresh
 
   # =================================================================
-  # PHASE 8: SYNTHESIZE + SELF-FIX (Codex — critical thinking)
+  # PHASE 8: SYNTHESIZE + SELF-FIX
   # =================================================================
 
   - id: synthesize
-    provider: codex
+    provider: claude
+    model: sonnet
     command: archon-synthesize-review
     depends_on: [code-review, error-handling, test-coverage, comment-quality, docs-impact]
     trigger_rule: one_success
@@ -300,11 +311,12 @@ nodes:
     context: fresh
 
   # =================================================================
-  # PHASE 10: REPORT (GLM 5.1 — summarization)
+  # PHASE 10: REPORT (GLM)
   # =================================================================
 
   - id: report
     provider: claude
+    model: sonnet
     command: archon-issue-completion-report
     depends_on: [simplify]
     context: fresh
