@@ -7,6 +7,7 @@ _Non-obvious patterns, gotchas, and conventions discovered during implementation
 ## Architecture Patterns
 
 ### Diagnosis Contracts
+- The diagnosis service owns a fixed six-question scored bank and always deep-clones snapshots before persistence so future bank edits do not mutate historical sessions.
 - Persisted diagnosis sessions should store scored question snapshots in `DiagnosisQuestionSnapshot`, while API payloads expose sanitized `DiagnosisQuestion` objects without scoring metadata.
 - Single-choice diagnosis answers are modeled explicitly as `questionId` + `choiceId` + `answeredAt`; generic free-form answer payloads are no longer part of the shared contract.
 
@@ -28,6 +29,7 @@ _Non-obvious patterns, gotchas, and conventions discovered during implementation
 - Error codes: standard HTTP status codes
 
 ### Scoring Algorithm
+- Implemented in `packages/server/src/services/diagnosis.ts`: each answered question contributes the selected choice's score to every dimension listed in that question's `dimensionIds`, missing scores are treated as `0`, the per-dimension average is rounded, and all outputs are clamped to `0..100`.
 - 5 dimensions scored 0-100
 - 5-8 diagnostic questions, each maps to 1-2 dimensions
 - Score = weighted average of relevant question answers
