@@ -1,3 +1,9 @@
+## Task 1: UPDATE `package.json` — COMPLETED
+Date: 2026-04-19
+Files: package.json, tsconfig.json, .env.example, packages/server/package.json, packages/server/tsconfig.json
+Commit: a7444e2
+---
+
 ## Task 4: CREATE `packages/server/src/routes/skills.test.ts` — COMPLETED
 Date: 2026-04-19
 Files: packages/server/src/routes/skills.test.ts
