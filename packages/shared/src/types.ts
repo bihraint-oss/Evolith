@@ -68,6 +68,13 @@ export interface SkillNode {
   updatedAt: IsoTimestampString;
 }
 
+export interface SkillNodeView extends SkillNode {
+  status: UserProgressStatus;
+  startedAt: IsoTimestampString | null;
+  completedAt: IsoTimestampString | null;
+  score: number | null;
+}
+
 export interface UserProgress {
   id: EntityId;
   userId: EntityId;
@@ -232,6 +239,20 @@ export interface GetProfileResponse {
   hasCompletedDiagnosis: boolean;
   lastDiagnosedAt: IsoTimestampString | null;
   radar: DiagnosisRadarData | null;
+}
+
+export type GetSkillsRequest = Record<string, never>;
+
+export interface GetSkillsResponse {
+  skills: SkillNodeView[];
+}
+
+export interface GetSkillRequest {
+  id: EntityId;
+}
+
+export interface GetSkillResponse {
+  skill: SkillNodeView;
 }
 
 export type StartDiagnosisRequest = Record<string, never>;
