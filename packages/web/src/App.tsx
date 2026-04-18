@@ -1,61 +1,202 @@
-type PlaceholderPanel = {
-  title: string;
-  description: string;
-  eyebrow: string;
-};
+import type { ReactNode } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
 
-const placeholderPanels: PlaceholderPanel[] = [
-  {
-    title: "Auth",
-    description: "Register and login flows will land here next, backed by the existing Hono auth endpoints.",
-    eyebrow: "Route /auth",
-  },
-  {
-    title: "Diagnosis",
-    description: "The six-question diagnosis flow will resume server-side sessions instead of duplicating state in the browser.",
-    eyebrow: "Route /diagnosis",
-  },
-  {
-    title: "Dashboard",
-    description: "Radar results and grouped skill states will render from profile and skills API responses without recomputation.",
-    eyebrow: "Route /dashboard",
-  },
-];
+import { AuthProvider, useAuth } from "./auth/auth-context";
+import {
+  resolveRouteRedirect,
+  type AppRoutePath,
+} from "./lib/routing";
 
 export default function App() {
   return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
+  );
+}
+
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route
+        path="/"
+        element={<GuardedRoute routePath="/" />}
+      />
+      <Route
+        path="/auth"
+        element={
+          <GuardedRoute routePath="/auth">
+            <RoutePreview
+              description="The auth workflow is ready for the real form component next. Session bootstrap and guard decisions are already centralized so this screen can focus on register and login only."
+              eyebrow="Route /auth"
+              title="Authentication will slot into a stable session shell."
+            />
+          </GuardedRoute>
+        }
+      />
+      <Route
+        path="/diagnosis"
+        element={
+          <GuardedRoute routePath="/diagnosis">
+            <RoutePreview
+              description="Diagnosis routing now waits for profile bootstrap before rendering, so the upcoming Q&A page can resume or start the server-side session without redirect flicker."
+              eyebrow="Route /diagnosis"
+              title="Diagnosis is reserved for authenticated users who still need scoring."
+            />
+          </GuardedRoute>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <GuardedRoute routePath="/dashboard">
+            <RoutePreview
+              description="Completed users will land here once the dashboard components exist. The app shell already redirects incomplete profiles back to diagnosis before first paint."
+              eyebrow="Route /dashboard"
+              title="Dashboard access is now gated by the profile bootstrap state."
+            />
+          </GuardedRoute>
+        }
+      />
+      <Route
+        path="*"
+        element={
+          <Navigate
+            replace
+            to="/"
+          />
+        }
+      />
+    </Routes>
+  );
+}
+
+interface GuardedRouteProps {
+  routePath: AppRoutePath;
+  children?: ReactNode;
+}
+
+function GuardedRoute({ routePath, children }: GuardedRouteProps) {
+  const { authStatus, profile } = useAuth();
+  const redirectPath = resolveRouteRedirect(routePath, {
+    authStatus,
+    hasCompletedDiagnosis: profile?.hasCompletedDiagnosis ?? null,
+  });
+  const isBootstrapPending =
+    authStatus === "loading" ||
+    (authStatus === "authenticated" && profile === null);
+
+  if (redirectPath !== null && redirectPath !== routePath) {
+    return (
+      <Navigate
+        replace
+        to={redirectPath}
+      />
+    );
+  }
+
+  if (isBootstrapPending) {
+    return (
+      <FullscreenShell
+        description="Loading stored credentials and profile state before the route guard commits to /auth, /diagnosis, or /dashboard."
+        title="Syncing your Evolith session"
+      />
+    );
+  }
+
+  return children ?? null;
+}
+
+interface FullscreenShellProps {
+  title: string;
+  description: string;
+}
+
+function FullscreenShell({ title, description }: FullscreenShellProps) {
+  return (
+    <div
+      style={{
+        alignItems: "center",
+        display: "grid",
+        minHeight: "100vh",
+      }}
+    >
+      <main
+        className="app-shell"
+        style={{
+          paddingBottom: "2rem",
+          paddingTop: "2rem",
+        }}
+      >
+        <section className="hero card">
+          <p className="hero-kicker">Bootstrap guard</p>
+          <h1>{title}</h1>
+          <p className="hero-copy">{description}</p>
+          <div className="hero-actions">
+            <span className="pill">Checking /api/profile</span>
+            <span className="pill">Blocking redirect flash</span>
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+}
+
+interface RoutePreviewProps {
+  title: string;
+  description: string;
+  eyebrow: string;
+}
+
+function RoutePreview({ title, description, eyebrow }: RoutePreviewProps) {
+  const { authStatus, profile, tokens } = useAuth();
+  const activeUser = profile === null ? "Anonymous" : profile.profile.userId;
+  const diagnosisStatus =
+    profile === null
+      ? "Profile unavailable"
+      : profile.hasCompletedDiagnosis
+        ? "Diagnosis complete"
+        : "Diagnosis pending";
+
+  return (
     <main className="app-shell">
       <section className="hero card">
-        <div className="hero-kicker">Phase 4 frontend scaffold</div>
-        <h1>Diagnosis-driven growth, staged for the demo loop.</h1>
-        <p className="hero-copy">
-          The Vite client is wired into the workspace and ready for the auth,
-          diagnosis, and dashboard routes that will layer on top of the existing API.
-        </p>
+        <p className="hero-kicker">{eyebrow}</p>
+        <h1>{title}</h1>
+        <p className="hero-copy">{description}</p>
         <div className="hero-actions">
-          <a
-            className="button-primary"
-            href="http://localhost:3000/api/health"
-            rel="noreferrer"
-            target="_blank"
-          >
-            Check API health
-          </a>
-          <span className="pill">React + Vite + Tailwind foundation</span>
+          <span className="pill">Auth: {authStatus}</span>
+          <span className="pill">Session: {tokens === null ? "empty" : "stored"}</span>
+          <span className="pill">Profile: {diagnosisStatus}</span>
         </div>
       </section>
 
       <section className="panel-grid">
-        {placeholderPanels.map((panel) => (
-          <article
-            className="card panel-card"
-            key={panel.title}
-          >
-            <p className="panel-eyebrow">{panel.eyebrow}</p>
-            <h2>{panel.title}</h2>
-            <p>{panel.description}</p>
-          </article>
-        ))}
+        <article className="card panel-card">
+          <p className="panel-eyebrow">Current user</p>
+          <h2>{activeUser}</h2>
+          <p>
+            The authenticated profile payload only exposes cognitive-profile
+            fields, so route guards depend on server truth instead of a second
+            client-side user record.
+          </p>
+        </article>
+        <article className="card panel-card">
+          <p className="panel-eyebrow">Bootstrap source</p>
+          <h2>/api/profile</h2>
+          <p>
+            Diagnosis completion comes from the authenticated profile response,
+            not from local assumptions or duplicated client-side flags.
+          </p>
+        </article>
+        <article className="card panel-card">
+          <p className="panel-eyebrow">Next step</p>
+          <h2>Feature UI</h2>
+          <p>
+            The upcoming route components can focus on forms and data rendering
+            because auth persistence and redirect decisions now live above them.
+          </p>
+        </article>
       </section>
     </main>
   );
