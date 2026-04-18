@@ -36,8 +36,9 @@
 - [x] 2026-04-19: Task 1 completed — added shared skill graph DTOs in `packages/shared/src/types.ts` for the skills list/detail responses and `SkillNodeView`.
 
 ## Phase 4: Frontend
-**Status**: 🚧 In progress
+**Status**: ✅ Done
 
+- [x] 2026-04-19: Task 10 completed — refreshed `README.md` into a repo-level server + web runbook, documented the local `dev:server` / `dev:web` flow plus the Vite `/api` proxy assumption, updated memory to mark Phase 4 complete, and verified the final handoff command `bun run validate && bun run build` passes cleanly.
 - [x] 2026-04-19: Task 9 completed — added `packages/web/src/lib/api-client.test.ts`, `routing.test.ts`, and `skills.test.ts` with Bun-native coverage for envelope parsing, structured API errors, Bearer auth headers, single refresh retry cleanup, route decisions, and skill grouping/label transforms against the real seeded skill tree, then updated `packages/server/package.json` so the normal root `bun run test` path executes both server and web suites. Required validation (`bun run type-check && bun run lint && bun run test && bun run format:check`) passed with 50 tests across 8 files.
 - [x] 2026-04-19: Task 8 completed — created `packages/web/src/routes/DashboardPage.tsx` plus `StatusBadge`, `RadarChartCard`, and `SkillGroupSection`, then wired `/dashboard` in `packages/web/src/App.tsx` away from the placeholder so completed users now see the backend-provided radar chart and all seeded skills grouped by dimension with visible status badges. Required validation (`bun run type-check && bun run lint && bun run test && bun run format:check`) passed, and the web build completed successfully afterward.
 - [x] 2026-04-19: Task 7 completed — created `packages/web/src/routes/DiagnosisPage.tsx` with server-driven session start/resume, sequential answer submission, inline recovery actions that reload the canonical session state, and profile refresh plus dashboard navigation on completion, then wired `/diagnosis` in `packages/web/src/App.tsx` away from the placeholder preview. Required validation (`bun run type-check && bun run lint && bun run test && bun run format:check`) passed afterward.

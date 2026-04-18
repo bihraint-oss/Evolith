@@ -1,3 +1,9 @@
+## Task 10: UPDATE `README.md`, `.claude/memory/PROGRESS.md`, and `.claude/memory/INDEX.md` — COMPLETED
+Date: 2026-04-19
+Files: README.md, .claude/memory/PROGRESS.md, .claude/memory/INDEX.md
+Commit: f07506f
+---
+
 ## Task 9: CREATE `packages/web/src/lib/api-client.test.ts`, `routing.test.ts`, and `skills.test.ts` — COMPLETED
 Date: 2026-04-19
 Files: packages/web/src/lib/api-client.test.ts, packages/web/src/lib/routing.test.ts, packages/web/src/lib/skills.test.ts, packages/server/package.json
