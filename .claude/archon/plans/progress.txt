@@ -1,3 +1,9 @@
+## Task 7: CREATE `packages/web/src/routes/DiagnosisPage.tsx` — COMPLETED
+Date: 2026-04-19
+Files: packages/web/src/routes/DiagnosisPage.tsx, packages/web/src/App.tsx
+Commit: 4b4945a
+---
+
 ## Task 6: CREATE `packages/web/src/routes/AuthPage.tsx` — COMPLETED
 Date: 2026-04-19
 Files: packages/web/src/routes/AuthPage.tsx, packages/web/src/App.tsx

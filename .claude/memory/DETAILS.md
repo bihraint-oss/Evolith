@@ -53,6 +53,8 @@ _Non-obvious patterns, gotchas, and conventions discovered during implementation
 ### Frontend Route Guards
 - `packages/web/src/App.tsx` owns the redirect table for `/`, `/auth`, `/diagnosis`, and `/dashboard`; route components should assume they are already on an allowed path and avoid re-implementing the same auth/diagnosis branching locally.
 - `packages/web/src/lib/routing.ts` returns `null` while auth/profile bootstrap is unresolved, so the app shell should render a loading gate instead of redirecting during first paint. This avoids `/auth` ↔ `/dashboard` or `/diagnosis` flashes while `/api/profile` is still loading.
+- `packages/web/src/routes/DiagnosisPage.tsx` should recover failed answer submissions by reloading `GET /api/profile/diagnosis/:id` instead of replaying the prior `choiceId`; this keeps the client aligned with the authoritative session state even when the original POST may have partially succeeded.
+- When the diagnosis API returns `state: "completed"`, refresh `/api/profile` through `auth-context.tsx` before navigating so the `/dashboard` guard and the destination page read the same `hasCompletedDiagnosis` source of truth.
 
 ### Drizzle SQLite Migrations
 - `drizzle-kit generate` correctly emitted the new `diagnosis_sessions.state` column and updated snapshot metadata, but the generated SQLite migration did not backfill rows derived from `completed_at`; phase work that depends on historical state needs a manual `UPDATE ... WHERE completed_at IS NOT NULL` patch in the generated SQL.
