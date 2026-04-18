@@ -1,9 +1,9 @@
 # Evolith Memory Index
 
 **Last updated**: 2026-04-18
-**Current phase**: Phase 0 Complete, Phase 1 Not Started
-**Current focus**: Ready to begin Phase 1 (Backend Foundation)
-**Next steps**: Initialize monorepo, set up Hono server, define Drizzle schema
+**Current phase**: Phase 2 In Progress
+**Current focus**: Phase 2 diagnosis schema and persistence updates after the shared DTO refactor
+**Next steps**: Add `diagnosis_sessions.state` and updated JSON typings in the server schema, generate the matching migration/meta files, then implement the diagnosis service and profile routes
 
 ---
 
@@ -20,19 +20,20 @@
 
 ## Project State Summary
 
-- **Repo**: Greenfield — no application code yet
-- **Branch**: `main` (initial commit only)
+- **Repo**: Phase 1 backend foundation is implemented; Phase 2 diagnosis work is in progress
+- **Branch**: `archon/task-piv-phase2-diagnosis`
 - **PRD**: Validated at `.archon/ralph/evolith-mvp/prd.md`
 - **Archon config**: Codex (gpt-5.4 xhigh) for dev-time AI
-- **Database**: PostgreSQL + pgvector (not yet set up)
-- **Dependencies**: None installed yet
+- **Database**: SQLite + Drizzle on Bun
+- **Dependencies**: Installed
+- **Latest completed task**: Shared diagnosis contract update in `packages/shared/src/types.ts`
 
 ## Phase Status
 
 | Phase | Status |
 |---|---|
 | 0 — Planning & PRD | ✅ Done |
-| 1 — Backend Foundation | ⬜ Not started |
-| 2 — Diagnosis Core Loop | ⬜ Not started |
+| 1 — Backend Foundation | ✅ Done |
+| 2 — Diagnosis Core Loop | 🔄 In progress |
 | 3 — Skill Graph API | ⬜ Not started |
 | 4 — Frontend | ⬜ Not started |

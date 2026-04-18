@@ -8,26 +8,14 @@
 - [x] 2026-04-18: Memory system created
 
 ## Phase 1: Backend Foundation
-**Status**: ⬜ Not started
+**Status**: ✅ Done
 
-### Tasks
-| # | Task | Status | Files | Notes |
-|---|---|---|---|---|
-| 1.1 | Initialize monorepo (Bun workspace, tsconfig) | ⬜ | `package.json`, `tsconfig.json` | Root config |
-| 1.2 | Set up Hono server skeleton | ⬜ | `packages/server/src/index.ts` | Entry point |
-| 1.3 | Define Drizzle schema | ⬜ | `packages/server/src/db/schema.ts` | 5 tables |
-| 1.4 | Run migration | ⬜ | `packages/server/drizzle.config.ts` | PostgreSQL |
-| 1.5 | Seed skill tree data | ⬜ | `packages/server/src/db/seed.ts` | 20-30 nodes |
-| 1.6 | Implement JWT auth middleware | ⬜ | `packages/server/src/middleware/auth.ts` | Verify tokens |
-| 1.7 | Implement auth routes | ⬜ | `packages/server/src/routes/auth.ts` | register/login/refresh |
-| 1.8 | Health check endpoint | ⬜ | `packages/server/src/index.ts` | GET /api/health |
-
-### Subtask Details
-_(Fill in as work progresses — implementation notes, gotchas, deviations from PRD)_
+- [x] 2026-04-18: Backend foundation completed in the earlier implementation loop. See `.claude/archon/plans/progress.txt` for the detailed task-by-task commit log.
 
 ## Phase 2: Diagnosis Core Loop
-**Status**: ⬜ Not started
-_(Tasks will be detailed when Phase 1 is complete)_
+**Status**: 🔄 In progress
+
+- [x] 2026-04-18: Task 1 completed — updated `packages/shared/src/types.ts` with single-choice diagnosis DTOs, scored question snapshot types, shared session/result/progress views, and radar data contracts.
 
 ## Phase 3: Skill Graph API
 **Status**: ⬜ Not started

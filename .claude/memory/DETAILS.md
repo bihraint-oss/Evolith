@@ -6,6 +6,10 @@ _Non-obvious patterns, gotchas, and conventions discovered during implementation
 
 ## Architecture Patterns
 
+### Diagnosis Contracts
+- Persisted diagnosis sessions should store scored question snapshots in `DiagnosisQuestionSnapshot`, while API payloads expose sanitized `DiagnosisQuestion` objects without scoring metadata.
+- Single-choice diagnosis answers are modeled explicitly as `questionId` + `choiceId` + `answeredAt`; generic free-form answer payloads are no longer part of the shared contract.
+
 ### Monorepo Structure
 - Bun workspaces: `packages/server`, `packages/web`, `packages/shared`
 - Shared types in `packages/shared/src/types.ts`
