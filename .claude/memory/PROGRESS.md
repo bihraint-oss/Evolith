@@ -38,4 +38,5 @@
 ## Phase 4: Frontend
 **Status**: 🚧 In progress
 
+- [x] 2026-04-19: Task 2 completed — expanded the root `tsconfig.json` so repo-wide typecheck now includes TSX and `.d.ts` files, uses `jsx: "react-jsx"`, and loads DOM browser libs for the incoming web package.
 - [x] 2026-04-19: Task 1 completed — created the `@evolith/web` workspace manifest, registered `packages/web` in the root workspace, added `dev:web`, updated the root `build` command to invoke the web build after repo typecheck, and refreshed `bun.lock` via `bun install`.

@@ -1,3 +1,9 @@
+## Task 2: UPDATE `tsconfig.json` — COMPLETED
+Date: 2026-04-19
+Files: tsconfig.json
+Commit: a139c13
+---
+
 ## Task 1: CREATE `packages/web/package.json` and UPDATE `package.json` / `bun.lock` — COMPLETED
 Date: 2026-04-19
 Files: package.json, packages/web/package.json, bun.lock
