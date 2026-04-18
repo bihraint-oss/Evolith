@@ -1,3 +1,9 @@
+## Task 6: CREATE `packages/web/src/routes/AuthPage.tsx` — COMPLETED
+Date: 2026-04-19
+Files: packages/web/src/routes/AuthPage.tsx, packages/web/src/App.tsx
+Commit: 42229f6
+---
+
 ## Task 5: CREATE `packages/web/src/auth/auth-context.tsx` and update `packages/web/src/App.tsx` — COMPLETED
 Date: 2026-04-19
 Files: packages/web/src/auth/auth-context.tsx, packages/web/src/App.tsx

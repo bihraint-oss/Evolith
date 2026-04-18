@@ -2,8 +2,8 @@
 
 **Last updated**: 2026-04-19
 **Current phase**: Phase 4 In Progress
-**Current focus**: Phase 4 now has auth bootstrap and centralized guarded routing in place, so the next implementation step is building the real `/auth` register/login screen on top of the shared auth context and API client
-**Next steps**: Complete Phase 4 Task 6 by creating `packages/web/src/routes/AuthPage.tsx`, wiring register/login requests through the shared auth helpers, and redirecting authenticated users to `/diagnosis` or `/dashboard`
+**Current focus**: Phase 4 now has the real `/auth` screen in place, so the next implementation step is building the diagnosis route that starts or resumes the server-driven Q&A flow and refreshes profile state on completion
+**Next steps**: Complete Phase 4 Task 7 by creating `packages/web/src/routes/DiagnosisPage.tsx`, wiring it into `/api/profile/diagnosis/start` and answer submission, and navigating completed sessions through the shared auth context to `/dashboard`
 
 ---
 
@@ -20,13 +20,13 @@
 
 ## Project State Summary
 
-- **Repo**: Phase 1 backend foundation, Phase 2 diagnosis core loop, and Phase 3 skill graph API are implemented; Phase 4 now has workspace plumbing, repo-wide browser typecheck coverage, a buildable Vite web scaffold, the shared frontend auth/API/routing/skill helper layer under `packages/web/src/lib`, and a bootstrapped `AuthProvider` with centralized route guarding in `packages/web/src/App.tsx`
+- **Repo**: Phase 1 backend foundation, Phase 2 diagnosis core loop, and Phase 3 skill graph API are implemented; Phase 4 now has workspace plumbing, repo-wide browser typecheck coverage, a buildable Vite web scaffold, the shared frontend auth/API/routing/skill helper layer under `packages/web/src/lib`, a bootstrapped `AuthProvider` with centralized route guarding, and the real `/auth` register/login screen wired into that session flow
 - **Branch**: `archon/task-plan-phase4-frontend`
 - **PRD**: Validated at `.archon/ralph/evolith-mvp/prd.md`
 - **Archon config**: Codex (gpt-5.4 xhigh) for dev-time AI
 - **Database**: SQLite + Drizzle on Bun
 - **Dependencies**: Installed
-- **Latest completed task**: Phase 4 Task 5 — created the frontend auth provider, bound the API client to reactive session state, and replaced the placeholder app shell with centralized guarded `/`, `/auth`, `/diagnosis`, and `/dashboard` routes
+- **Latest completed task**: Phase 4 Task 6 — created the frontend `/auth` screen with combined register/login modes, backend error surfacing, context-driven token persistence, and post-auth routing into `/diagnosis` or `/dashboard`
 
 ## Phase Status
 

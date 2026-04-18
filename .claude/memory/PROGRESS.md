@@ -38,6 +38,7 @@
 ## Phase 4: Frontend
 **Status**: 🚧 In progress
 
+- [x] 2026-04-19: Task 6 completed — created `packages/web/src/routes/AuthPage.tsx` as the real combined register/login screen with a mode toggle, backend error-message surfacing, submit disabling while pending, and successful auth handoff through `setAuthFromAuthResponse`, then wired `/auth` in `packages/web/src/App.tsx` away from the placeholder preview. Repo validation and the root web build both passed afterward.
 - [x] 2026-04-19: Task 5 completed — created `packages/web/src/auth/auth-context.tsx` to bootstrap auth from stored tokens, bind the API client to reactive session state, and fetch `/api/profile`, then replaced `packages/web/src/App.tsx` with centralized guarded routes for `/`, `/auth`, `/diagnosis`, and `/dashboard` plus a full-screen bootstrap loading gate to avoid redirect flash.
 - [x] 2026-04-19: Task 4 completed — added `packages/web/src/lib/auth-session.ts`, `api-client.ts`, `routing.ts`, and `skills.ts` so the frontend now has safe localStorage token persistence, a typed `/api` client with envelope parsing and deduplicated refresh-on-401 behavior, centralized pure route-resolution helpers, and ordered skill grouping/label transforms for the dashboard.
 - [x] 2026-04-19: Task 3 completed — scaffolded `packages/web` with a buildable Vite entrypoint, package-local TypeScript config, `/api` proxying to `http://localhost:3000`, a BrowserRouter bootstrap, a placeholder React shell, and the initial warm-tone CSS system for the frontend surface.
