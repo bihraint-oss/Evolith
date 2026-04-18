@@ -2,8 +2,8 @@
 
 **Last updated**: 2026-04-18
 **Current phase**: Phase 2 In Progress
-**Current focus**: Phase 2 AI provider placeholder and profile route implementation
-**Next steps**: Add the product-time AI provider interface placeholder, then implement the authenticated profile and diagnosis routes
+**Current focus**: Phase 2 diagnosis and profile test coverage
+**Next steps**: Add diagnosis service tests, add profile route integration tests, then run full Phase 2 validation
 
 ---
 
@@ -26,7 +26,7 @@
 - **Archon config**: Codex (gpt-5.4 xhigh) for dev-time AI
 - **Database**: SQLite + Drizzle on Bun
 - **Dependencies**: Installed
-- **Latest completed task**: Diagnosis service implementation in `packages/server/src/services/diagnosis.ts`
+- **Latest completed task**: App composition updated in `packages/server/src/app.ts` to mount the authenticated profile and diagnosis router
 
 ## Phase Status
 

@@ -11,6 +11,17 @@ _Track all API endpoint additions, modifications, and removals._
 
 ---
 
+## [Unreleased] — Phase 2
+
+### Activated Endpoints
+
+- `+ GET /api/profile` — authenticated cognitive profile lookup is now mounted in `createApp`
+- `+ POST /api/profile/diagnosis/start` — authenticated diagnosis-session start and resume flow is now mounted in `createApp`
+- `+ GET /api/profile/diagnosis/:id` — authenticated diagnosis-session fetch is now mounted in `createApp`
+- `+ POST /api/profile/diagnosis/:id/answer` — authenticated sequential-answer submission is now mounted in `createApp`
+
+---
+
 ## [Unreleased] — Phase 1
 
 _(No endpoints yet — Phase 1 will add auth and health endpoints)_

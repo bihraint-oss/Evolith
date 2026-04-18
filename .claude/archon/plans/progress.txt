@@ -1,3 +1,9 @@
+## Task 8: UPDATE `packages/server/src/app.ts` — COMPLETED
+Date: 2026-04-18
+Files: packages/server/src/app.ts
+Commit: 8a1fc56
+---
+
 ## Task 7: CREATE `packages/server/src/routes/profile.ts` — COMPLETED
 Date: 2026-04-18
 Files: packages/server/src/routes/profile.ts

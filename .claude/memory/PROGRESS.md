@@ -15,6 +15,9 @@
 ## Phase 2: Diagnosis Core Loop
 **Status**: 🔄 In progress
 
+- [x] 2026-04-18: Task 8 completed — updated `packages/server/src/app.ts` to mount `createProfileRouter` under the shared `/api` prefix whenever auth dependencies are present, making the authenticated profile and diagnosis endpoints reachable through `createApp`.
+- [x] 2026-04-18: Task 7 completed — created `packages/server/src/routes/profile.ts` with authenticated `/api/profile` and diagnosis lifecycle routes, sequential answer validation, and transactional completion that overwrites `cognitive_profiles`.
+- [x] 2026-04-18: Task 6 completed — added `packages/server/src/services/ai-provider.ts` as the interface-only placeholder for future product-time AI integrations without wiring it into the request path.
 - [x] 2026-04-18: Task 5 completed — created `packages/server/src/services/diagnosis.ts` with the fixed diagnosis bank, question sanitization helpers, next-choice validation, deterministic scoring, and radar/result builders.
 - [x] 2026-04-18: Task 4 completed — committed Drizzle metadata updates in `packages/server/src/db/migrations/meta/_journal.json` and `0001_snapshot.json` for the new diagnosis session state column.
 - [x] 2026-04-18: Task 3 completed — generated `packages/server/src/db/migrations/0001_wakeful_silverclaw.sql` to add `diagnosis_sessions.state` with an explicit backfill that marks existing completed sessions as `completed`.
