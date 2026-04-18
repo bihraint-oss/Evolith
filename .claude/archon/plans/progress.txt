@@ -1,3 +1,9 @@
+## Task 6: CREATE `packages/server/src/services/ai-provider.ts` — COMPLETED
+Date: 2026-04-18
+Files: packages/server/src/services/ai-provider.ts
+Commit: af27d30
+---
+
 ## Task 5: CREATE `packages/server/src/services/diagnosis.ts` — COMPLETED
 Date: 2026-04-18
 Files: packages/server/src/services/diagnosis.ts
