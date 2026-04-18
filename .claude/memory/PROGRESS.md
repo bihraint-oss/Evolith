@@ -27,8 +27,10 @@
 - [x] 2026-04-18: Task 1 completed — updated `packages/shared/src/types.ts` with single-choice diagnosis DTOs, scored question snapshot types, shared session/result/progress views, and radar data contracts.
 
 ## Phase 3: Skill Graph API
-**Status**: ⬜ Not started
-_(Tasks will be detailed when Phase 1 is complete)_
+**Status**: 🚧 In progress
+
+- [x] 2026-04-19: Task 2 completed — created `packages/server/src/routes/skills.ts` with authenticated `GET /skills` and `GET /skills/:id` handlers, per-user progress joins, stable seeded ordering, and derived unlock-state computation that only treats stored `inProgress` and `completed` rows as authoritative overrides.
+- [x] 2026-04-19: Task 1 completed — added shared skill graph DTOs in `packages/shared/src/types.ts` for the skills list/detail responses and `SkillNodeView`.
 
 ## Phase 4: Frontend
 **Status**: ⬜ Not started
