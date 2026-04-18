@@ -1,12 +1,14 @@
 import type {
   CognitiveDimensionScores,
   DiagnosisAnswer,
-  DiagnosisQuestion,
+  DiagnosisQuestionSnapshot,
+  DiagnosisSessionState,
   EntityId,
   SkillDifficulty,
 } from "@evolith/shared";
 import {
   cognitiveDimensions,
+  diagnosisSessionStates,
   userProgressStatuses,
 } from "@evolith/shared";
 import { sql } from "drizzle-orm";
@@ -99,18 +101,31 @@ export const userProgress = sqliteTable(
   ],
 );
 
-export const diagnosisSessions = sqliteTable("diagnosis_sessions", {
-  id: createIdColumn("id"),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  questions: createJsonTextColumn<DiagnosisQuestion[]>("questions").notNull(),
-  answers: createJsonTextColumn<DiagnosisAnswer[]>("answers").notNull(),
-  profileSnapshot:
-    createJsonTextColumn<CognitiveDimensionScores>("profile_snapshot"),
-  completedAt: text("completed_at"),
-  ...createTimestampColumns(),
-});
+export const diagnosisSessions = sqliteTable(
+  "diagnosis_sessions",
+  {
+    id: createIdColumn("id"),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    state: text("state", { enum: diagnosisSessionStates })
+      .$type<DiagnosisSessionState>()
+      .notNull()
+      .default("inProgress"),
+    questions:
+      createJsonTextColumn<DiagnosisQuestionSnapshot[]>("questions").notNull(),
+    answers: createJsonTextColumn<DiagnosisAnswer[]>("answers").notNull(),
+    profileSnapshot:
+      createJsonTextColumn<CognitiveDimensionScores | null>("profile_snapshot"),
+    completedAt: text("completed_at"),
+    ...createTimestampColumns(),
+  },
+  (table) => [
+    uniqueIndex("diagnosis_sessions_user_id_in_progress_unique")
+      .on(table.userId)
+      .where(sql`${table.state} = 'inProgress'`),
+  ],
+);
 
 export const schema = {
   users,

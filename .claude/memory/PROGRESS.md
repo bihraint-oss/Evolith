@@ -8,26 +8,23 @@
 - [x] 2026-04-18: Memory system created
 
 ## Phase 1: Backend Foundation
-**Status**: ⬜ Not started
+**Status**: ✅ Done
 
-### Tasks
-| # | Task | Status | Files | Notes |
-|---|---|---|---|---|
-| 1.1 | Initialize monorepo (Bun workspace, tsconfig) | ⬜ | `package.json`, `tsconfig.json` | Root config |
-| 1.2 | Set up Hono server skeleton | ⬜ | `packages/server/src/index.ts` | Entry point |
-| 1.3 | Define Drizzle schema | ⬜ | `packages/server/src/db/schema.ts` | 5 tables |
-| 1.4 | Run migration | ⬜ | `packages/server/drizzle.config.ts` | PostgreSQL |
-| 1.5 | Seed skill tree data | ⬜ | `packages/server/src/db/seed.ts` | 20-30 nodes |
-| 1.6 | Implement JWT auth middleware | ⬜ | `packages/server/src/middleware/auth.ts` | Verify tokens |
-| 1.7 | Implement auth routes | ⬜ | `packages/server/src/routes/auth.ts` | register/login/refresh |
-| 1.8 | Health check endpoint | ⬜ | `packages/server/src/index.ts` | GET /api/health |
-
-### Subtask Details
-_(Fill in as work progresses — implementation notes, gotchas, deviations from PRD)_
+- [x] 2026-04-18: Backend foundation completed in the earlier implementation loop. See `.claude/archon/plans/progress.txt` for the detailed task-by-task commit log.
 
 ## Phase 2: Diagnosis Core Loop
-**Status**: ⬜ Not started
-_(Tasks will be detailed when Phase 1 is complete)_
+**Status**: ✅ Done
+
+- [x] 2026-04-19: Task 11 completed — addressed PR #2 review follow-ups by rejecting corrupted in-progress sessions on read/resume, enforcing a one-active-session-per-user database invariant, expanding route/service regression coverage, refreshing Phase 2 docs/memory, and adding a root `build` script for repo validation.
+- [x] 2026-04-19: Task 10 completed — added `packages/server/src/routes/profile.test.ts` with end-to-end coverage for auth guarding, profile pre-diagnosis state, diagnosis start/resume, invalid-choice and out-of-order answer rejection, completion persistence, re-diagnosis overwrite behavior, completed-session history retention, and ownership checks. Full validation now passes for the Phase 2 backend loop.
+- [x] 2026-04-18: Task 8 completed — updated `packages/server/src/app.ts` to mount `createProfileRouter` under the shared `/api` prefix whenever auth dependencies are present, making the authenticated profile and diagnosis endpoints reachable through `createApp`.
+- [x] 2026-04-18: Task 7 completed — created `packages/server/src/routes/profile.ts` with authenticated `/api/profile` and diagnosis lifecycle routes, sequential answer validation, and transactional completion that overwrites `cognitive_profiles`.
+- [x] 2026-04-18: Task 6 completed — added `packages/server/src/services/ai-provider.ts` as the interface-only placeholder for future product-time AI integrations without wiring it into the request path.
+- [x] 2026-04-18: Task 5 completed — created `packages/server/src/services/diagnosis.ts` with the fixed diagnosis bank, question sanitization helpers, next-choice validation, deterministic scoring, and radar/result builders.
+- [x] 2026-04-18: Task 4 completed — committed Drizzle metadata updates in `packages/server/src/db/migrations/meta/_journal.json` and `0001_snapshot.json` for the new diagnosis session state column.
+- [x] 2026-04-18: Task 3 completed — generated `packages/server/src/db/migrations/0001_wakeful_silverclaw.sql` to add `diagnosis_sessions.state` with an explicit backfill that marks existing completed sessions as `completed`.
+- [x] 2026-04-18: Task 2 completed — updated `packages/server/src/db/schema.ts` to add `diagnosis_sessions.state`, store scored `DiagnosisQuestionSnapshot[]` question JSON, and make `profileSnapshot` nullable in the Drizzle typing.
+- [x] 2026-04-18: Task 1 completed — updated `packages/shared/src/types.ts` with single-choice diagnosis DTOs, scored question snapshot types, shared session/result/progress views, and radar data contracts.
 
 ## Phase 3: Skill Graph API
 **Status**: ⬜ Not started

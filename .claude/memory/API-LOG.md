@@ -11,11 +11,22 @@ _Track all API endpoint additions, modifications, and removals._
 
 ---
 
+## [Unreleased] — Phase 2
+
+### Activated Endpoints
+
+- `+ GET /api/profile` — authenticated cognitive profile lookup is now mounted in `createApp`
+- `+ POST /api/profile/diagnosis/start` — authenticated diagnosis-session start and resume flow is now mounted in `createApp`
+- `+ GET /api/profile/diagnosis/:id` — authenticated diagnosis-session fetch is now mounted in `createApp`
+- `+ POST /api/profile/diagnosis/:id/answer` — authenticated sequential-answer submission is now mounted in `createApp`
+
+---
+
 ## [Unreleased] — Phase 1
 
-_(No endpoints yet — Phase 1 will add auth and health endpoints)_
+Phase 1 shipped the initial health and auth surface that Phase 2 builds on.
 
-### Planned Endpoints (from PRD)
+### Delivered Endpoints
 
 **Auth:**
 - `+ POST /api/auth/register` — create user + empty cognitive profile
@@ -25,7 +36,9 @@ _(No endpoints yet — Phase 1 will add auth and health endpoints)_
 **Health:**
 - `+ GET /api/health` — service health check
 
-**Profile (Phase 2):**
+### Planned Endpoints (from PRD backlog)
+
+**Profile:**
 - `+ GET /api/profile` — cognitive profile + radar chart data
 - `+ POST /api/profile/diagnosis/start` — create diagnosis session, return first question
 - `+ POST /api/profile/diagnosis/:id/answer` — submit answer, return next question or completion
