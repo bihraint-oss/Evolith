@@ -1,3 +1,9 @@
+## Task 5: CREATE migration configuration and initial migration — COMPLETED
+Date: 2026-04-18
+Files: packages/server/drizzle.config.ts, packages/server/src/db/migrate.ts, packages/server/src/db/migrations/0000_massive_calypso.sql, packages/server/src/db/migrations/meta/0000_snapshot.json, packages/server/src/db/migrations/meta/_journal.json
+Commit: 73795a0
+---
+
 ## Task 4: CREATE SQLite DB client and schema — COMPLETED
 Date: 2026-04-18
 Files: packages/server/src/db/client.ts, packages/server/src/db/schema.ts
