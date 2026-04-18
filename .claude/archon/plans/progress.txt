@@ -1,3 +1,9 @@
+## Task 4: CREATE SQLite DB client and schema — COMPLETED
+Date: 2026-04-18
+Files: packages/server/src/db/client.ts, packages/server/src/db/schema.ts
+Commit: 7683cb1
+---
+
 ## Task 3: CREATE server package skeleton and app composition — COMPLETED
 Date: 2026-04-18
 Files: packages/server/src/app.ts, packages/server/src/index.ts, packages/server/src/config/env.ts, packages/server/src/lib/http.ts, packages/server/src/lib/logger.ts, packages/server/src/routes/health.ts
