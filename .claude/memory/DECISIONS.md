@@ -4,6 +4,13 @@ _Entries in reverse chronological order (newest first)._
 
 ---
 
+### D-007: Skills API returns derived status only
+- **Date**: 2026-04-19
+- **Decision**: `GET /api/skills` and `GET /api/skills/:id` expose seeded skill-node fields plus computed `status` only; they do not return `startedAt`, `completedAt`, or `score`.
+- **Rationale**: Review feedback confirmed the Phase 3 frontend only needs unlock/completion state, and omitting extra progress metadata keeps the read contract minimal until write flows or richer learning analytics exist.
+- **Alternatives**: Return progress timestamps/scores immediately; persist derived `locked`/`available` rows and expose them directly.
+- **Impact**: `SkillNodeView` stays narrow, the skills router strips user-progress metadata from responses, and integration tests assert those fields are absent at runtime.
+
 ## Pre-Implementation Decisions (from PRD Phase 0)
 
 ### D-006: Flexible interfaces for questions & skill tree

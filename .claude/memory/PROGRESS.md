@@ -29,6 +29,9 @@
 ## Phase 3: Skill Graph API
 **Status**: 🚧 In progress
 
+- [x] 2026-04-19: Review follow-up completed — aligned the authenticated skills read API with validation feedback by keeping both endpoints auth-guarded, preserving seeded id ordering, returning locked detail nodes with `200`, exposing only `status` as the progress overlay field, and refreshing the route-level integration coverage.
+- [x] 2026-04-19: Task 4 completed — added `packages/server/src/routes/skills.test.ts` with integration coverage for auth, diagnosis gating, prerequisite unlock derivation, `inProgress`/`completed` overrides, locked detail reads, missing ids, response shape, and user isolation.
+- [x] 2026-04-19: Task 3 completed — mounted `createSkillsRouter` under the shared `/api` prefix in `packages/server/src/app.ts`, activating the authenticated skills list and detail endpoints.
 - [x] 2026-04-19: Task 2 completed — created `packages/server/src/routes/skills.ts` with authenticated `GET /skills` and `GET /skills/:id` handlers, per-user progress joins, stable seeded ordering, and derived unlock-state computation that only treats stored `inProgress` and `completed` rows as authoritative overrides.
 - [x] 2026-04-19: Task 1 completed — added shared skill graph DTOs in `packages/shared/src/types.ts` for the skills list/detail responses and `SkillNodeView`.
 

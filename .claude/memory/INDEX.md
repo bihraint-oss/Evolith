@@ -2,8 +2,8 @@
 
 **Last updated**: 2026-04-19
 **Current phase**: Phase 3 In Progress
-**Current focus**: The shared skill DTOs and the authenticated skills router are implemented and validated locally; app mounting and route integration coverage remain
-**Next steps**: Mount `createSkillsRouter` in `packages/server/src/app.ts`, then add `packages/server/src/routes/skills.test.ts` coverage for auth, seeded ordering, unlock derivation, overrides, detail behavior, and user isolation
+**Current focus**: The authenticated Phase 3 skills API is mounted, integration-tested, and aligned with review feedback; awaiting re-review or approval
+**Next steps**: Re-review the `/api/skills` implementation, or request any additional follow-up before approval
 
 ---
 
@@ -26,7 +26,7 @@
 - **Archon config**: Codex (gpt-5.4 xhigh) for dev-time AI
 - **Database**: SQLite + Drizzle on Bun
 - **Dependencies**: Installed
-- **Latest completed task**: Phase 3 Task 2 — created the authenticated skills router with derived unlock-state mapping for the seeded DAG
+- **Latest completed task**: Phase 3 review follow-up — narrowed the skills response contract to status-only progress data and refreshed integration coverage
 
 ## Phase Status
 

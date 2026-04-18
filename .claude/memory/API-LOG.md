@@ -13,10 +13,10 @@ _Track all API endpoint additions, modifications, and removals._
 
 ## [Unreleased] — Phase 3
 
-### Implemented In Router (Mount Pending)
+### Activated Endpoints
 
-- `+ GET /api/skills` — authenticated skills list route now derives per-user unlock state from completed prerequisites and `user_progress` overrides
-- `+ GET /api/skills/:id` — authenticated skill detail route now returns locked nodes with `200` and missing ids with `skill_not_found`
+- `+ GET /api/skills` — authenticated skills list endpoint is mounted and returns seeded nodes in id order with derived per-user `status`
+- `+ GET /api/skills/:id` — authenticated skill detail endpoint is mounted, returns locked nodes with `200` plus computed `status`, and returns `skill_not_found` for unknown ids
 
 ---
 
