@@ -11,6 +11,7 @@ _Non-obvious patterns, gotchas, and conventions discovered during implementation
 - `packages/web/src/lib/api-client.ts` owns API envelope parsing, Bearer header injection, and token refresh retry logic for protected requests; page-level code should call the typed helpers instead of reimplementing fetch details.
 - Refresh retries are deduplicated through a single in-flight promise so concurrent 401 responses share one `/api/auth/refresh` exchange instead of churning tokens.
 - The API client uses configurable auth-session bindings, which lets `auth-context.tsx` own reactive auth state later while the transport layer still persists refreshed tokens and clears auth on refresh failure.
+- `packages/web/src/routes/DashboardPage.tsx` protects the `/api/skills` fetch with a request-sequence ref keyed to the active authenticated user so a slow response from an older session cannot overwrite the newer dashboard state after auth changes.
 
 ### Skill Graph Unlock State
 - The Phase 3 skills read API derives `locked` and `available` on read from `skill_nodes.prerequisites` plus the authenticated user's completed `user_progress` rows.
