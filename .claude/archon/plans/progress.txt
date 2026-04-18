@@ -1,3 +1,9 @@
+## Task 8: UPDATE `README.md` — COMPLETED
+Date: 2026-04-19
+Files: README.md
+Commit: 5020ce7
+---
+
 ## Task 7: CREATE `packages/web/src/App.tsx` — COMPLETED
 Date: 2026-04-19
 Files: packages/web/src/App.tsx, packages/web/src/components/ProtectedRoute.tsx, packages/web/src/components/AppShell.tsx, packages/web/src/App.test.tsx, packages/web/src/main.tsx
