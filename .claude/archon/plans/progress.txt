@@ -1,3 +1,9 @@
+## Task 5: CREATE `packages/web/src/auth/auth-context.tsx` and update `packages/web/src/App.tsx` — COMPLETED
+Date: 2026-04-19
+Files: packages/web/src/auth/auth-context.tsx, packages/web/src/App.tsx
+Commit: 93df130
+---
+
 ## Task 4: CREATE `packages/web/src/lib/auth-session.ts`, `api-client.ts`, `routing.ts`, and `skills.ts` — COMPLETED
 Date: 2026-04-19
 Files: packages/web/src/lib/auth-session.ts, packages/web/src/lib/api-client.ts, packages/web/src/lib/routing.ts, packages/web/src/lib/skills.ts
