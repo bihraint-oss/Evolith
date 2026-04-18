@@ -11,6 +11,7 @@ import type { AppDatabase } from "../db/client";
 import {
   type SkillNodeRow,
   type UserProgressRow,
+  cognitiveProfiles,
   skillNodes,
   userProgress,
 } from "../db/schema";
@@ -62,6 +63,7 @@ function deriveSkillStatus(
   skillNode: SkillNodeRow,
   progressRow: UserProgressRow | undefined,
   completedSkillIds: Set<string>,
+  hasCompletedDiagnosis: boolean,
 ): UserProgressStatus {
   if (progressRow?.status === "completed") {
     return "completed";
@@ -69,6 +71,11 @@ function deriveSkillStatus(
 
   if (progressRow?.status === "inProgress") {
     return "inProgress";
+  }
+
+  // User must complete diagnosis before any skills become available
+  if (!hasCompletedDiagnosis) {
+    return "locked";
   }
 
   return skillNode.prerequisites.every((prerequisiteId) =>
@@ -82,6 +89,7 @@ function toSkillNodeView(
   skillNode: SkillNodeRow,
   progressRow: UserProgressRow | undefined,
   completedSkillIds: Set<string>,
+  hasCompletedDiagnosis: boolean,
 ): SkillNodeView {
   return {
     id: skillNode.id,
@@ -93,11 +101,24 @@ function toSkillNodeView(
     completionCriteria: skillNode.completionCriteria,
     createdAt: skillNode.createdAt,
     updatedAt: skillNode.updatedAt,
-    status: deriveSkillStatus(skillNode, progressRow, completedSkillIds),
+    status: deriveSkillStatus(skillNode, progressRow, completedSkillIds, hasCompletedDiagnosis),
     startedAt: progressRow?.startedAt ?? null,
     completedAt: progressRow?.completedAt ?? null,
     score: progressRow?.score ?? null,
   };
+}
+
+function hasUserCompletedDiagnosis(
+  db: AppDatabase,
+  userId: string,
+): boolean {
+  const profile = db
+    .select()
+    .from(cognitiveProfiles)
+    .where(eq(cognitiveProfiles.userId, userId))
+    .get();
+  // Profile exists but diagnosis is complete only when lastDiagnosedAt is set
+  return profile !== undefined && profile.lastDiagnosedAt !== null;
 }
 
 function listSkillNodeViews(db: AppDatabase, userId: string): SkillNodeView[] {
@@ -105,12 +126,14 @@ function listSkillNodeViews(db: AppDatabase, userId: string): SkillNodeView[] {
   const progressRows = findUserProgressRows(db, userId);
   const progressBySkillNodeId = createProgressIndex(progressRows);
   const completedSkillIds = createCompletedSkillIdSet(progressRows);
+  const hasCompletedDiagnosis = hasUserCompletedDiagnosis(db, userId);
 
   return allSkillNodes.map((skillNode) =>
     toSkillNodeView(
       skillNode,
       progressBySkillNodeId.get(skillNode.id),
       completedSkillIds,
+      hasCompletedDiagnosis,
     ),
   );
 }
@@ -144,6 +167,15 @@ export function createSkillsRouter(
 
     if (skill === undefined) {
       return errorResponse(context, "Skill not found", 404, "skill_not_found");
+    }
+
+    if (skill.status === "locked") {
+      return errorResponse(
+        context,
+        "Skill is locked",
+        403,
+        "skill_locked",
+      );
     }
 
     const response: GetSkillResponse = { skill };

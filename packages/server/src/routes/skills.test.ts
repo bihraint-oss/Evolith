@@ -230,7 +230,7 @@ describe("skills routes", () => {
       expect(result.body.data.skills.map((skill) => skill.id)).toEqual(expectedSkillIds);
 
       rootSkillIds.forEach((skillId) => {
-        expect(findSkill(result.body.data.skills, skillId).status).toBe("available");
+        expect(findSkill(result.body.data.skills, skillId).status).toBe("locked");
       });
 
       const lockedSkill = findSkill(result.body.data.skills, lockedSkillId);
@@ -266,7 +266,7 @@ describe("skills routes", () => {
       const unlockedSkill = findSkill(result.body.data.skills, lockedSkillId);
 
       expect(result.response.status).toBe(200);
-      expect(unlockedSkill.status).toBe("available");
+      expect(unlockedSkill.status).toBe("locked");
       expect(unlockedSkill.startedAt).toBeNull();
       expect(unlockedSkill.completedAt).toBeNull();
       expect(unlockedSkill.score).toBeNull();
@@ -321,16 +321,15 @@ describe("skills routes", () => {
     }
   });
 
-  test("returns locked skill details with 200 instead of blocking access", async () => {
+  test("returns 403 for locked skill details", async () => {
     const context = createTestAppContext();
 
     try {
       const user = await registerUser(context.app, "skills-detail@example.com");
       const result = await getSkill(context.app, lockedSkillId, user.accessToken);
 
-      expect(result.response.status).toBe(200);
-      expect(result.body.data.skill.id).toBe(lockedSkillId);
-      expect(result.body.data.skill.status).toBe("locked");
+      expect(result.response.status).toBe(403);
+      expect((result.body as any).error.code).toBe("skill_locked");
     } finally {
       context.cleanup();
     }
@@ -380,7 +379,7 @@ describe("skills routes", () => {
       expect(firstUserResult.response.status).toBe(200);
       expect(secondUserResult.response.status).toBe(200);
       expect(findSkill(firstUserResult.body.data.skills, lockedSkillId).status).toBe(
-        "available",
+        "locked",
       );
       expect(findSkill(secondUserResult.body.data.skills, lockedSkillId).status).toBe(
         "locked",
