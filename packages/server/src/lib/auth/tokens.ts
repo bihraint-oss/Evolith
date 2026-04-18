@@ -72,6 +72,7 @@ async function signToken(
   })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(identity.userId)
+    .setJti(crypto.randomUUID())
     .setIssuedAt()
     .setExpirationTime(ttl)
     .sign(createSigningKey(secret));

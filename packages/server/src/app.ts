@@ -1,18 +1,31 @@
 import { Hono } from "hono";
 import type { Logger } from "pino";
 
+import type { AppDatabase } from "./db/client";
+import type { TokenService } from "./lib/auth/tokens";
 import { errorResponse } from "./lib/http";
 import { createLogger, createRequestLogger } from "./lib/logger";
+import { createAuthRouter } from "./routes/auth";
 import { createHealthRouter } from "./routes/health";
 
 export interface AppDependencies {
-  db?: unknown;
+  db?: AppDatabase;
   logger?: Logger;
+  tokenService?: TokenService;
 }
 
 export function createApp(dependencies: AppDependencies = {}): Hono {
   const logger = dependencies.logger ?? createLogger();
   const app = new Hono();
+
+  if (
+    (dependencies.db === undefined) !==
+    (dependencies.tokenService === undefined)
+  ) {
+    throw new Error(
+      "createApp requires both db and tokenService to enable auth routes",
+    );
+  }
 
   app.use("*", createRequestLogger(logger));
 
@@ -43,6 +56,16 @@ export function createApp(dependencies: AppDependencies = {}): Hono {
   });
 
   app.route("/api", createHealthRouter());
+
+  if (dependencies.db !== undefined && dependencies.tokenService !== undefined) {
+    app.route(
+      "/api",
+      createAuthRouter({
+        db: dependencies.db,
+        tokenService: dependencies.tokenService,
+      }),
+    );
+  }
 
   app.notFound((context) => {
     return errorResponse(context, "Route not found", 404, "not_found");
