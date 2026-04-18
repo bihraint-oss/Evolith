@@ -1,3 +1,9 @@
+## Task 7: CREATE auth primitives and middleware — COMPLETED
+Date: 2026-04-18
+Files: packages/server/src/lib/auth/password.ts, packages/server/src/lib/auth/tokens.ts, packages/server/src/middleware/auth.ts
+Commit: 868d90b
+---
+
 ## Task 6: CREATE deterministic skill-tree seed data — COMPLETED
 Date: 2026-04-18
 Files: packages/server/src/db/seed-data/skill-tree.ts, packages/server/src/db/seed.ts
