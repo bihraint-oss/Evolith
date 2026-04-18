@@ -6,6 +6,11 @@ _Non-obvious patterns, gotchas, and conventions discovered during implementation
 
 ## Architecture Patterns
 
+### Frontend Auth Transport
+- `packages/web/src/lib/api-client.ts` owns API envelope parsing, Bearer header injection, and token refresh retry logic for protected requests; page-level code should call the typed helpers instead of reimplementing fetch details.
+- Refresh retries are deduplicated through a single in-flight promise so concurrent 401 responses share one `/api/auth/refresh` exchange instead of churning tokens.
+- The API client uses configurable auth-session bindings, which lets `auth-context.tsx` own reactive auth state later while the transport layer still persists refreshed tokens and clears auth on refresh failure.
+
 ### Skill Graph Unlock State
 - The Phase 3 skills read API derives `locked` and `available` on read from `skill_nodes.prerequisites` plus the authenticated user's completed `user_progress` rows.
 - Only persisted `user_progress.status` values of `inProgress` and `completed` should override the derived state; sparse `locked` or `available` rows are intentionally ignored for status computation.
@@ -43,6 +48,9 @@ _Non-obvious patterns, gotchas, and conventions discovered during implementation
 ---
 
 ## Gotchas & Workarounds
+
+### Frontend Route Guards
+- `packages/web/src/lib/routing.ts` returns `null` while auth/profile bootstrap is unresolved, so the app shell should render a loading gate instead of redirecting during first paint. This avoids `/auth` ↔ `/dashboard` or `/diagnosis` flashes while `/api/profile` is still loading.
 
 ### Drizzle SQLite Migrations
 - `drizzle-kit generate` correctly emitted the new `diagnosis_sessions.state` column and updated snapshot metadata, but the generated SQLite migration did not backfill rows derived from `completed_at`; phase work that depends on historical state needs a manual `UPDATE ... WHERE completed_at IS NOT NULL` patch in the generated SQL.
