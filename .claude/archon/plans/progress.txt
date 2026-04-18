@@ -1,3 +1,9 @@
+## Task 4: CREATE `packages/web/src/pages/Auth.tsx` — COMPLETED
+Date: 2026-04-19
+Files: packages/web/src/lib/session.tsx, packages/web/src/pages/Auth.tsx, packages/web/src/pages/Auth.test.tsx
+Commit: 1aac76e
+---
+
 ## Task 3: CREATE `packages/web/src/lib/api.ts` — COMPLETED
 Date: 2026-04-19
 Files: packages/web/src/lib/api.ts, packages/web/src/lib/api.test.ts, packages/web/src/lib/session.tsx
