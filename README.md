@@ -1,6 +1,12 @@
-# Evolith Backend
+# Evolith
 
-Evolith provides a Bun workspace with a shared TypeScript package and a Hono API backed by SQLite + Drizzle. The current backend includes health and auth endpoints, authenticated `/api/profile` diagnosis routes, and authenticated `/api/skills` read endpoints that stay locked until diagnosis is complete.
+Evolith is a Bun monorepo for the MVP capability-evolution demo. It includes a Hono API, shared transport/types, and a React/Vite frontend that drives the register/login, diagnosis, and dashboard flow.
+
+## Workspace Layout
+
+- `packages/server`: Hono API, SQLite/Drizzle persistence, seed/migration scripts, repo validation entrypoint
+- `packages/shared`: shared request/response DTOs and domain types
+- `packages/web`: React/Vite frontend for `/auth`, `/diagnosis`, and `/dashboard`
 
 ## Prerequisites
 
@@ -17,31 +23,58 @@ bun run db:migrate
 bun run db:seed
 ```
 
-The default `.env.example` values start the API on `http://localhost:3000` and store the SQLite database at `packages/server/dev.db`.
+Default local assumptions:
 
-## Run
+- API origin: `http://localhost:3000`
+- SQLite database: `packages/server/dev.db`
+- Vite dev server proxies `/api` to `http://localhost:3000`
 
-Start the server:
+## Development
+
+Start the API in one shell:
 
 ```bash
 bun run dev:server
 ```
 
-In another shell, verify the health endpoint:
+Start the frontend in another shell:
 
 ```bash
-curl -sS http://localhost:3000/api/health
+bun run dev:web
 ```
 
-Expected shape:
+Then open the Vite URL shown in the terminal, usually `http://localhost:5173`.
 
-```json
-{"data":{"status":"ok","service":"evolith-server","timestamp":"2026-04-18T00:00:00.000Z"}}
+The frontend flow is:
+
+1. `/auth`: register or log in
+2. `/diagnosis`: start or resume the six-question diagnosis
+3. `/dashboard`: view the backend-provided radar plus grouped skill statuses
+
+The frontend assumes the API is reachable at `http://localhost:3000` during local development because [`packages/web/vite.config.ts`](/Users/bihrain/.archon/worktrees/my_factory/Evolith/archon/task-plan-phase4-frontend/packages/web/vite.config.ts:1) proxies `/api` there. If you change the API port, update that proxy or run the web app against a matching origin.
+
+## Validation
+
+Useful root commands:
+
+```bash
+bun run type-check
+bun run lint
+bun run test
+bun run format:check
 ```
 
-## Auth Smoke Test
+Final repo validation for handoff or merge:
 
-Use a clean shell while the server is running:
+```bash
+bun run validate && bun run build
+```
+
+`bun run validate` runs the centralized repo typecheck/lint/test/format-check path through `packages/server`. `bun run build` adds the production Vite build for `packages/web`.
+
+## API Smoke Check
+
+If you want to verify the backend without the browser, start the server and use:
 
 ```bash
 API_URL="http://localhost:3000/api"
@@ -50,15 +83,19 @@ PASSWORD="SuperSecret123"
 DISPLAY_NAME="Ada Lovelace"
 ```
 
+Health:
+
+```bash
+curl -sS "$API_URL/health"
+```
+
 Register:
 
 ```bash
-REGISTER_RESPONSE=$(curl -sS \
+curl -sS \
   -X POST "$API_URL/auth/register" \
   -H "content-type: application/json" \
-  -d "{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\",\"displayName\":\"$DISPLAY_NAME\"}")
-
-printf '%s\n' "$REGISTER_RESPONSE"
+  -d "{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\",\"displayName\":\"$DISPLAY_NAME\"}"
 ```
 
 Login:
@@ -72,59 +109,13 @@ LOGIN_RESPONSE=$(curl -sS \
 printf '%s\n' "$LOGIN_RESPONSE"
 ```
 
-Extract the access token and refresh token from the login response:
+Extract the access token:
 
 ```bash
 ACCESS_TOKEN=$(printf '%s' "$LOGIN_RESPONSE" | bun -e 'const input = await new Response(Bun.stdin.stream()).text(); const json = JSON.parse(input); console.log(json.data.tokens.accessToken);')
-
-printf '%s\n' "$ACCESS_TOKEN"
 ```
 
-```bash
-REFRESH_TOKEN=$(printf '%s' "$LOGIN_RESPONSE" | bun -e 'const input = await new Response(Bun.stdin.stream()).text(); const json = JSON.parse(input); console.log(json.data.tokens.refreshToken);')
-
-printf '%s\n' "$REFRESH_TOKEN"
-```
-
-Refresh:
-
-```bash
-curl -sS \
-  -X POST "$API_URL/auth/refresh" \
-  -H "content-type: application/json" \
-  -d "{\"refreshToken\":\"$REFRESH_TOKEN\"}"
-```
-
-Duplicate registration should return `409`:
-
-```bash
-curl -i -sS \
-  -X POST "$API_URL/auth/register" \
-  -H "content-type: application/json" \
-  -d "{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\",\"displayName\":\"$DISPLAY_NAME\"}"
-```
-
-Invalid login should return `401`:
-
-```bash
-curl -i -sS \
-  -X POST "$API_URL/auth/login" \
-  -H "content-type: application/json" \
-  -d "{\"email\":\"$EMAIL\",\"password\":\"wrong-password\"}"
-```
-
-Invalid refresh should return `401`:
-
-```bash
-curl -i -sS \
-  -X POST "$API_URL/auth/refresh" \
-  -H "content-type: application/json" \
-  -d '{"refreshToken":"not-a-real-token"}'
-```
-
-## Profile & Diagnosis Smoke Test
-
-Fetch the authenticated profile:
+Fetch the profile:
 
 ```bash
 curl -sS \
@@ -132,106 +123,10 @@ curl -sS \
   "$API_URL/profile"
 ```
 
-Start or resume a diagnosis session:
-
-```bash
-START_RESPONSE=$(curl -sS \
-  -X POST "$API_URL/profile/diagnosis/start" \
-  -H "Authorization: Bearer $ACCESS_TOKEN" \
-  -H "content-type: application/json" \
-  -d '{}')
-
-printf '%s\n' "$START_RESPONSE"
-```
-
-Extract the session id:
-
-```bash
-SESSION_ID=$(printf '%s' "$START_RESPONSE" | bun -e 'const input = await new Response(Bun.stdin.stream()).text(); const json = JSON.parse(input); console.log(json.data.session.id);')
-
-printf '%s\n' "$SESSION_ID"
-```
-
-Submit the first answer:
-
-```bash
-curl -sS \
-  -X POST "$API_URL/profile/diagnosis/$SESSION_ID/answer" \
-  -H "Authorization: Bearer $ACCESS_TOKEN" \
-  -H "content-type: application/json" \
-  -d '{"choiceId":"sequenced"}'
-```
-
-Inspect the session and profile again:
-
-```bash
-curl -sS \
-  -H "Authorization: Bearer $ACCESS_TOKEN" \
-  "$API_URL/profile/diagnosis/$SESSION_ID"
-
-curl -sS \
-  -H "Authorization: Bearer $ACCESS_TOKEN" \
-  "$API_URL/profile"
-```
-
-Repeat `POST /api/profile/diagnosis/$SESSION_ID/answer` with the current question's `choiceId` until the session returns `"state":"completed"`.
-
-## Skills Smoke Test
-
-List the seeded skills for the authenticated user:
-
-```bash
-SKILLS_RESPONSE=$(curl -sS \
-  -H "Authorization: Bearer $ACCESS_TOKEN" \
-  "$API_URL/skills")
-
-printf '%s\n' "$SKILLS_RESPONSE"
-```
-
-Before diagnosis completes, every skill should report `"status":"locked"` even for root nodes. Fetch one skill directly:
-
-```bash
-SKILL_ID=$(printf '%s' "$SKILLS_RESPONSE" | bun -e 'const input = await new Response(Bun.stdin.stream()).text(); const json = JSON.parse(input); console.log(json.data.skills[0].id);')
-
-curl -sS \
-  -H "Authorization: Bearer $ACCESS_TOKEN" \
-  "$API_URL/skills/$SKILL_ID"
-```
-
-After the diagnosis session is completed, fetch the skills again. Root nodes now report `"status":"available"`, while deeper nodes remain `"locked"` until their prerequisites are completed.
+List skills:
 
 ```bash
 curl -sS \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
   "$API_URL/skills"
-```
-
-All API responses use one of these envelopes:
-
-```json
-{"data":{...}}
-```
-
-```json
-{"error":{"message":"...","code":"..."}}
-```
-
-## Development Commands
-
-Run the test suite:
-
-```bash
-bun run test
-```
-
-Run the full validation script:
-
-```bash
-bun run validate
-```
-
-Regenerate SQL migrations after schema changes:
-
-```bash
-bun run db:generate
 ```
