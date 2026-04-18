@@ -1,3 +1,15 @@
+## Task 4: UPDATE `packages/server/src/db/migrations/meta/` — COMPLETED
+Date: 2026-04-18
+Files: packages/server/src/db/migrations/meta/_journal.json, packages/server/src/db/migrations/meta/0001_snapshot.json
+Commit: 86112af
+---
+
+## Task 3: UPDATE `packages/server/src/db/migrations/` — COMPLETED
+Date: 2026-04-18
+Files: packages/server/src/db/migrations/0001_wakeful_silverclaw.sql
+Commit: 86112af
+---
+
 ## Task 2: UPDATE `packages/server/src/db/schema.ts` — COMPLETED
 Date: 2026-04-18
 Files: packages/server/src/db/schema.ts

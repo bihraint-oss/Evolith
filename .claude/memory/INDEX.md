@@ -2,8 +2,8 @@
 
 **Last updated**: 2026-04-18
 **Current phase**: Phase 2 In Progress
-**Current focus**: Phase 2 migration generation for the diagnosis session schema update
-**Next steps**: Generate the migration and metadata for `diagnosis_sessions.state`, then implement the diagnosis service and profile routes
+**Current focus**: Phase 2 diagnosis service implementation
+**Next steps**: Build the deterministic diagnosis service, then add the AI provider placeholder and authenticated profile routes
 
 ---
 
@@ -26,7 +26,7 @@
 - **Archon config**: Codex (gpt-5.4 xhigh) for dev-time AI
 - **Database**: SQLite + Drizzle on Bun
 - **Dependencies**: Installed
-- **Latest completed task**: Diagnosis session schema update in `packages/server/src/db/schema.ts`
+- **Latest completed task**: Diagnosis migration generation and metadata update for `diagnosis_sessions.state`
 
 ## Phase Status
 

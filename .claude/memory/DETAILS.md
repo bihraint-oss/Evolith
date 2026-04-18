@@ -37,7 +37,8 @@ _Non-obvious patterns, gotchas, and conventions discovered during implementation
 
 ## Gotchas & Workarounds
 
-_(None yet — add as discovered)_
+### Drizzle SQLite Migrations
+- `drizzle-kit generate` correctly emitted the new `diagnosis_sessions.state` column and updated snapshot metadata, but the generated SQLite migration did not backfill rows derived from `completed_at`; phase work that depends on historical state needs a manual `UPDATE ... WHERE completed_at IS NOT NULL` patch in the generated SQL.
 
 ---
 
