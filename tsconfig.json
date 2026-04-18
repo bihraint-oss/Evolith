@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": [
+      "ESNext"
+    ],
+    "strict": true,
+    "noEmit": true,
+    "allowJs": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "verbatimModuleSyntax": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@evolith/shared": [
+        "packages/shared/src/index.ts"
+      ],
+      "@evolith/shared/*": [
+        "packages/shared/src/*"
+      ]
+    },
+    "types": [
+      "bun-types"
+    ]
+  },
+  "include": [
+    "packages/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".build"
+  ]
+}
