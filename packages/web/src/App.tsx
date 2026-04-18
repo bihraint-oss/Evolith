@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { AuthProvider, useAuth } from "./auth/auth-context";
+import AuthPage from "./routes/AuthPage";
 import {
   resolveRouteRedirect,
   type AppRoutePath,
@@ -26,11 +27,7 @@ function AppRoutes() {
         path="/auth"
         element={
           <GuardedRoute routePath="/auth">
-            <RoutePreview
-              description="The auth workflow is ready for the real form component next. Session bootstrap and guard decisions are already centralized so this screen can focus on register and login only."
-              eyebrow="Route /auth"
-              title="Authentication will slot into a stable session shell."
-            />
+            <AuthPage />
           </GuardedRoute>
         }
       />
