@@ -1,3 +1,9 @@
+## Task 3: UPDATE `packages/server/src/app.ts` — COMPLETED
+Date: 2026-04-19
+Files: packages/server/src/app.ts
+Commit: 3d137e6
+---
+
 ## Task 2: CREATE `packages/server/src/routes/skills.ts` — COMPLETED
 Date: 2026-04-19
 Files: packages/server/src/routes/skills.ts
