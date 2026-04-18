@@ -6,6 +6,11 @@ _Non-obvious patterns, gotchas, and conventions discovered during implementation
 
 ## Architecture Patterns
 
+### Skill Graph Unlock State
+- The Phase 3 skills read API derives `locked` and `available` on read from `skill_nodes.prerequisites` plus the authenticated user's completed `user_progress` rows.
+- Only persisted `user_progress.status` values of `inProgress` and `completed` should override the derived state; sparse `locked` or `available` rows are intentionally ignored for status computation.
+- Skill nodes should be loaded with `orderBy(asc(skill_nodes.id))` so the API preserves the authored DAG order from the deterministic seed data.
+
 ### Diagnosis Contracts
 - The diagnosis service owns a fixed six-question scored bank and always deep-clones snapshots before persistence so future bank edits do not mutate historical sessions.
 - Persisted diagnosis sessions should store scored question snapshots in `DiagnosisQuestionSnapshot`, while API payloads expose sanitized `DiagnosisQuestion` objects without scoring metadata.

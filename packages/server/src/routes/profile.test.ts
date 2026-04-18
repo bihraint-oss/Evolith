@@ -551,7 +551,7 @@ describe("profile diagnosis routes", () => {
     }
   });
 
-  test("returns a sanitized 500 when an in-progress session has no remaining question", async () => {
+  test("returns 409 when an in-progress session has no remaining question", async () => {
     const context = createTestAppContext();
 
     try {
@@ -592,9 +592,63 @@ describe("profile diagnosis routes", () => {
       );
       const body = await parseJson<ApiErrorResponse>(response);
 
-      expect(response.status).toBe(500);
-      expect(body.error.code).toBe("internal_error");
-      expect(body.error.message).toBe("Internal server error");
+      expect(response.status).toBe(409);
+      expect(body.error.code).toBe("session_invalid_state");
+      expect(body.error.message).toBe(
+        "Diagnosis session is in progress but has no remaining questions",
+      );
+    } finally {
+      context.cleanup();
+    }
+  });
+
+  test("returns 409 when resuming an in-progress session with no remaining question", async () => {
+    const context = createTestAppContext();
+
+    try {
+      const user = await registerUser(context.app, "corrupted-session-resume@example.com");
+      const started = await startDiagnosis(context.app, user.accessToken);
+      const session = expectInProgressSession(started.body.data.session);
+      const storedSession = context.dbClient.db
+        .select()
+        .from(diagnosisSessions)
+        .where(eq(diagnosisSessions.id, session.id))
+        .get();
+
+      expect(storedSession).toBeDefined();
+
+      if (storedSession === undefined) {
+        throw new Error("Expected stored diagnosis session to exist.");
+      }
+
+      const answers = storedSession.questions.map((question) => ({
+        questionId: question.id,
+        choiceId: question.choices[0]!.id,
+        answeredAt: "2026-04-19T00:00:00.000Z",
+      }));
+
+      context.dbClient.db
+        .update(diagnosisSessions)
+        .set({
+          answers,
+          updatedAt: "2026-04-19 00:00:00",
+        })
+        .where(eq(diagnosisSessions.id, session.id))
+        .run();
+
+      const response = await postJson(
+        context.app,
+        "/api/profile/diagnosis/start",
+        {},
+        user.accessToken,
+      );
+      const body = await parseJson<ApiErrorResponse>(response);
+
+      expect(response.status).toBe(409);
+      expect(body.error.code).toBe("session_invalid_state");
+      expect(body.error.message).toBe(
+        "Diagnosis session is in progress but has no remaining questions",
+      );
     } finally {
       context.cleanup();
     }

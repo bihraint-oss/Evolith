@@ -1,9 +1,9 @@
 # Evolith Memory Index
 
 **Last updated**: 2026-04-19
-**Current phase**: Phase 2 Complete
-**Current focus**: Phase 2 backend diagnosis review follow-ups are applied and fully validated on the PR branch
-**Next steps**: Begin Phase 3 Skill Graph API planning and decide whether to add inline diagnosis-route JSDoc near the public exports
+**Current phase**: Phase 3 In Progress
+**Current focus**: The authenticated Phase 3 skills API is mounted, integration-tested, and aligned with review feedback; awaiting re-review or approval
+**Next steps**: Re-review the `/api/skills` implementation, or request any additional follow-up before approval
 
 ---
 
@@ -20,13 +20,13 @@
 
 ## Project State Summary
 
-- **Repo**: Phase 1 backend foundation and Phase 2 diagnosis core loop are implemented
-- **Branch**: `archon/task-piv-phase2-diagnosis`
+- **Repo**: Phase 1 backend foundation and Phase 2 diagnosis core loop are implemented; Phase 3 skill graph route work is underway
+- **Branch**: `archon/task-plan-phase3-skill-graph`
 - **PRD**: Validated at `.archon/ralph/evolith-mvp/prd.md`
 - **Archon config**: Codex (gpt-5.4 xhigh) for dev-time AI
 - **Database**: SQLite + Drizzle on Bun
 - **Dependencies**: Installed
-- **Latest completed task**: Closed PR #2 review follow-ups for diagnosis session integrity, request-body regression coverage, and Phase 2 documentation drift
+- **Latest completed task**: Phase 3 review follow-up — narrowed the skills response contract to status-only progress data and refreshed integration coverage
 
 ## Phase Status
 
@@ -35,5 +35,5 @@
 | 0 — Planning & PRD | ✅ Done |
 | 1 — Backend Foundation | ✅ Done |
 | 2 — Diagnosis Core Loop | ✅ Done |
-| 3 — Skill Graph API | ⬜ Not started |
+| 3 — Skill Graph API | 🚧 In progress |
 | 4 — Frontend | ⬜ Not started |

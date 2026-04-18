@@ -249,9 +249,28 @@ function getDuplicateInProgressSessionResponse(
   );
 }
 
+function getSessionInvalidStateResponse(context: ProfileContext): Response {
+  return errorResponse(
+    context,
+    "Diagnosis session is in progress but has no remaining questions",
+    409,
+    "session_invalid_state",
+  );
+}
+
+function getSessionStateMismatchResponse(context: ProfileContext): Response {
+  return errorResponse(
+    context,
+    "Diagnosis session is not in progress",
+    409,
+    "session_state_invalid",
+  );
+}
+
 function toDiagnosisSessionView(
+  context: ProfileContext,
   session: DiagnosisSessionRow,
-): DiagnosisSessionView {
+): DiagnosisSessionView | Response {
   const progress = getDiagnosisProgress(session.questions, session.answers);
 
   if (session.state === "completed") {
@@ -273,9 +292,7 @@ function toDiagnosisSessionView(
   );
 
   if (currentQuestion === null) {
-    throw new Error(
-      `Diagnosis session ${session.id} is in progress but has no remaining question`,
-    );
+    return getSessionInvalidStateResponse(context);
   }
 
   return {
@@ -291,14 +308,17 @@ function toDiagnosisSessionView(
 }
 
 function toInProgressDiagnosisSessionView(
+  context: ProfileContext,
   session: DiagnosisSessionRow,
-): StartDiagnosisResponse["session"] {
-  const view = toDiagnosisSessionView(session);
+): StartDiagnosisResponse["session"] | Response {
+  const view = toDiagnosisSessionView(context, session);
+
+  if (view instanceof Response) {
+    return view;
+  }
 
   if (view.state !== "inProgress") {
-    throw new Error(
-      `Expected diagnosis session ${session.id} to be in progress, received ${view.state}`,
-    );
+    return getSessionStateMismatchResponse(context);
   }
 
   return view;
@@ -405,8 +425,14 @@ export function createProfileRouter(
         return invalidSessionResponse;
       }
 
+      const sessionView = toInProgressDiagnosisSessionView(context, existingSession);
+
+      if (sessionView instanceof Response) {
+        return sessionView;
+      }
+
       const response: StartDiagnosisResponse = {
-        session: toInProgressDiagnosisSessionView(existingSession),
+        session: sessionView,
       };
 
       return successResponse(context, response);
@@ -450,8 +476,17 @@ export function createProfileRouter(
             return invalidSessionResponse;
           }
 
+          const sessionView = toInProgressDiagnosisSessionView(
+            context,
+            conflictedSession,
+          );
+
+          if (sessionView instanceof Response) {
+            return sessionView;
+          }
+
           const response: StartDiagnosisResponse = {
-            session: toInProgressDiagnosisSessionView(conflictedSession),
+            session: sessionView,
           };
 
           return successResponse(context, response);
@@ -471,8 +506,14 @@ export function createProfileRouter(
       throw new Error(`Failed to load created diagnosis session ${sessionId}`);
     }
 
+    const sessionView = toInProgressDiagnosisSessionView(context, createdSession);
+
+    if (sessionView instanceof Response) {
+      return sessionView;
+    }
+
     const response: StartDiagnosisResponse = {
-      session: toInProgressDiagnosisSessionView(createdSession),
+      session: sessionView,
     };
 
     return successResponse(context, response, 201);
@@ -500,8 +541,14 @@ export function createProfileRouter(
       return invalidSessionResponse;
     }
 
+    const sessionView = toDiagnosisSessionView(context, session);
+
+    if (sessionView instanceof Response) {
+      return sessionView;
+    }
+
     const response: GetDiagnosisSessionResponse = {
-      session: toDiagnosisSessionView(session),
+      session: sessionView,
     };
 
     return successResponse(context, response);
@@ -654,8 +701,14 @@ export function createProfileRouter(
       throw new Error(`Failed to load diagnosis session ${session.id}`);
     }
 
+    const sessionView = toDiagnosisSessionView(context, persistedSession);
+
+    if (sessionView instanceof Response) {
+      return sessionView;
+    }
+
     const response: AnswerDiagnosisResponse = {
-      session: toDiagnosisSessionView(persistedSession),
+      session: sessionView,
     };
 
     return successResponse(context, response);

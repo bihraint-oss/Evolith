@@ -1,6 +1,6 @@
-# Evolith Phase 2 Backend
+# Evolith Backend
 
-Phase 2 provides a Bun workspace with a shared TypeScript package and a Hono API backed by SQLite + Drizzle. The current backend includes health and auth endpoints plus authenticated `/api/profile` diagnosis routes for starting, resuming, answering, and reviewing cognitive diagnosis sessions.
+Evolith provides a Bun workspace with a shared TypeScript package and a Hono API backed by SQLite + Drizzle. The current backend includes health and auth endpoints, authenticated `/api/profile` diagnosis routes, and authenticated `/api/skills` read endpoints that stay locked until diagnosis is complete.
 
 ## Prerequisites
 
@@ -175,6 +175,36 @@ curl -sS \
 ```
 
 Repeat `POST /api/profile/diagnosis/$SESSION_ID/answer` with the current question's `choiceId` until the session returns `"state":"completed"`.
+
+## Skills Smoke Test
+
+List the seeded skills for the authenticated user:
+
+```bash
+SKILLS_RESPONSE=$(curl -sS \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  "$API_URL/skills")
+
+printf '%s\n' "$SKILLS_RESPONSE"
+```
+
+Before diagnosis completes, every skill should report `"status":"locked"` even for root nodes. Fetch one skill directly:
+
+```bash
+SKILL_ID=$(printf '%s' "$SKILLS_RESPONSE" | bun -e 'const input = await new Response(Bun.stdin.stream()).text(); const json = JSON.parse(input); console.log(json.data.skills[0].id);')
+
+curl -sS \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  "$API_URL/skills/$SKILL_ID"
+```
+
+After the diagnosis session is completed, fetch the skills again. Root nodes now report `"status":"available"`, while deeper nodes remain `"locked"` until their prerequisites are completed.
+
+```bash
+curl -sS \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  "$API_URL/skills"
+```
 
 All API responses use one of these envelopes:
 

@@ -11,6 +11,15 @@ _Track all API endpoint additions, modifications, and removals._
 
 ---
 
+## [Unreleased] — Phase 3
+
+### Activated Endpoints
+
+- `+ GET /api/skills` — authenticated skills list endpoint is mounted and returns seeded nodes in id order with derived per-user `status`
+- `+ GET /api/skills/:id` — authenticated skill detail endpoint is mounted, returns locked nodes with `200` plus computed `status`, and returns `skill_not_found` for unknown ids
+
+---
+
 ## [Unreleased] — Phase 2
 
 ### Activated Endpoints
