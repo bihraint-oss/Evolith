@@ -1,12 +1,14 @@
 import type {
   CognitiveDimensionScores,
   DiagnosisAnswer,
-  DiagnosisQuestion,
+  DiagnosisQuestionSnapshot,
+  DiagnosisSessionState,
   EntityId,
   SkillDifficulty,
 } from "@evolith/shared";
 import {
   cognitiveDimensions,
+  diagnosisSessionStates,
   userProgressStatuses,
 } from "@evolith/shared";
 import { sql } from "drizzle-orm";
@@ -104,10 +106,15 @@ export const diagnosisSessions = sqliteTable("diagnosis_sessions", {
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  questions: createJsonTextColumn<DiagnosisQuestion[]>("questions").notNull(),
+  state: text("state", { enum: diagnosisSessionStates })
+    .$type<DiagnosisSessionState>()
+    .notNull()
+    .default("inProgress"),
+  questions:
+    createJsonTextColumn<DiagnosisQuestionSnapshot[]>("questions").notNull(),
   answers: createJsonTextColumn<DiagnosisAnswer[]>("answers").notNull(),
   profileSnapshot:
-    createJsonTextColumn<CognitiveDimensionScores>("profile_snapshot"),
+    createJsonTextColumn<CognitiveDimensionScores | null>("profile_snapshot"),
   completedAt: text("completed_at"),
   ...createTimestampColumns(),
 });
