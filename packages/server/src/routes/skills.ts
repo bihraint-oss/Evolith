@@ -59,6 +59,12 @@ function createCompletedSkillIdSet(progressRows: UserProgressRow[]): Set<string>
   );
 }
 
+/**
+ * Derives the current skill status for a user.
+ *
+ * Stored progress overrides the computed state. Otherwise, skills remain
+ * locked until diagnosis is complete, then unlock based on prerequisites.
+ */
 function deriveSkillStatus(
   skillNode: SkillNodeRow,
   progressRow: UserProgressRow | undefined,
@@ -85,6 +91,9 @@ function deriveSkillStatus(
     : "locked";
 }
 
+/**
+ * Maps the persisted skill node plus optional progress into the API view.
+ */
 function toSkillNodeView(
   skillNode: SkillNodeRow,
   progressRow: UserProgressRow | undefined,
@@ -101,13 +110,21 @@ function toSkillNodeView(
     completionCriteria: skillNode.completionCriteria,
     createdAt: skillNode.createdAt,
     updatedAt: skillNode.updatedAt,
-    status: deriveSkillStatus(skillNode, progressRow, completedSkillIds, hasCompletedDiagnosis),
+    status: deriveSkillStatus(
+      skillNode,
+      progressRow,
+      completedSkillIds,
+      hasCompletedDiagnosis,
+    ),
     startedAt: progressRow?.startedAt ?? null,
     completedAt: progressRow?.completedAt ?? null,
     score: progressRow?.score ?? null,
   };
 }
 
+/**
+ * Returns whether the user has completed diagnosis.
+ */
 function hasUserCompletedDiagnosis(
   db: AppDatabase,
   userId: string,
@@ -121,6 +138,9 @@ function hasUserCompletedDiagnosis(
   return profile !== undefined && profile.lastDiagnosedAt !== null;
 }
 
+/**
+ * Loads the full skill graph and overlays user-specific progress state.
+ */
 function listSkillNodeViews(db: AppDatabase, userId: string): SkillNodeView[] {
   const allSkillNodes = findAllSkillNodes(db);
   const progressRows = findUserProgressRows(db, userId);
@@ -138,6 +158,15 @@ function listSkillNodeViews(db: AppDatabase, userId: string): SkillNodeView[] {
   );
 }
 
+/**
+ * Creates an authenticated skills router for the skill graph read API.
+ *
+ * All routes require a valid Bearer token. Locked skill details still return
+ * the computed node view so clients can render future anchors.
+ *
+ * @param dependencies - Route dependencies for database access and token validation
+ * @returns Hono router with authenticated `GET /skills` and `GET /skills/:id`
+ */
 export function createSkillsRouter(
   dependencies: SkillsRouteDependencies,
 ): Hono<AuthContextBindings> {
@@ -167,15 +196,6 @@ export function createSkillsRouter(
 
     if (skill === undefined) {
       return errorResponse(context, "Skill not found", 404, "skill_not_found");
-    }
-
-    if (skill.status === "locked") {
-      return errorResponse(
-        context,
-        "Skill is locked",
-        403,
-        "skill_locked",
-      );
     }
 
     const response: GetSkillResponse = { skill };

@@ -1,15 +1,15 @@
 # Feature: Phase 3 Skill Graph API
 
 ## Summary
-Add the authenticated Phase 3 skills read API so the frontend can fetch the seeded skill DAG with per-user unlock status. The implementation should reuse the existing Hono + Drizzle route patterns, add shared DTOs for the new responses, and keep unlock state derived from prerequisites instead of storing new rows.
+Add the authenticated Phase 3 skills read API so the frontend can fetch the seeded skill DAG with per-user unlock status. The implementation should reuse the existing Hono + Drizzle route patterns, add shared DTOs for the new responses, keep unlock state derived from prerequisites instead of storing new rows, and apply the diagnosis gate before any skill becomes available.
 
 ## Mission
-Expose the seeded skill graph through authenticated `/api/skills` endpoints that merge `skill_nodes` with the current user's `user_progress` rows and compute unlock state from completed prerequisites.
+Expose the seeded skill graph through authenticated `/api/skills` endpoints that merge `skill_nodes` with the current user's `user_progress` rows, keep all skills locked until diagnosis completion, and then compute unlock state from completed prerequisites.
 
 ## Success Criteria
 - [ ] `GET /api/skills` returns `{ data: { skills: SkillNodeView[] } }` for authenticated users and includes all 25 seeded nodes
 - [ ] Each returned skill includes the base node fields plus computed `status`, `startedAt`, `completedAt`, and `score`
-- [ ] Unlock rules are correct: root nodes default to `available`, unmet prerequisites yield `locked`, completed prerequisites yield `available`, and stored `inProgress` / `completed` rows override the derived state
+- [ ] Unlock rules are correct: all skills remain `locked` until diagnosis is complete; after diagnosis, root nodes default to `available`, unmet prerequisites yield `locked`, completed prerequisites yield `available`, and stored `inProgress` / `completed` rows override the derived state
 - [ ] `GET /api/skills/:id` returns one `SkillNodeView` with `200` even when the node is locked, and returns `404` with code `skill_not_found` when the id does not exist
 - [ ] The skills router is mounted under `/api` and protected by bearer auth
 - [ ] All validation passes (`bun run validate`)
@@ -102,7 +102,7 @@ Execute in order. Each task is atomic and independently verifiable.
 
 ### Task 2: CREATE `packages/server/src/routes/skills.ts`
 **Action**: CREATE
-**Details**: Create `SkillsRouteDependencies` with `db` and `tokenService`, construct `Hono<AuthContextBindings>`, and guard `/skills` plus `/skills/*` with `createAuthMiddleware`. Add route-local helpers to: load all `skillNodes` in stable seeded order (`orderBy(asc(skillNodes.id))`), load the authenticated user's `userProgress` rows, index progress by `skillNodeId`, build the completed-id set, derive each node's `status`, and map DB rows into `SkillNodeView`. The derivation rules are: stored `completed` => `completed`; stored `inProgress` => `inProgress`; otherwise `available` only when every `prerequisiteId` is in the completed-id set, else `locked`. `GET /skills` returns all mapped nodes in `{ data: { skills } }`. `GET /skills/:id` reuses the same mapped views, returns `{ data: { skill } }` for the requested id, and returns `errorResponse(context, "Skill not found", 404, "skill_not_found")` when absent. Do not create or mutate `user_progress` rows in this router.
+**Details**: Create `SkillsRouteDependencies` with `db` and `tokenService`, construct `Hono<AuthContextBindings>`, and guard `/skills` plus `/skills/*` with `createAuthMiddleware`. Add route-local helpers to: load all `skillNodes` in stable seeded order (`orderBy(asc(skillNodes.id))`), load the authenticated user's `userProgress` rows, index progress by `skillNodeId`, build the completed-id set, derive each node's `status`, and map DB rows into `SkillNodeView`. The derivation rules are: stored `completed` => `completed`; stored `inProgress` => `inProgress`; otherwise skills stay `locked` until diagnosis is complete, then become `available` only when every `prerequisiteId` is in the completed-id set, else remain `locked`. `GET /skills` returns all mapped nodes in `{ data: { skills } }`. `GET /skills/:id` reuses the same mapped views, returns `{ data: { skill } }` for the requested id, and returns `errorResponse(context, "Skill not found", 404, "skill_not_found")` when absent. Do not create or mutate `user_progress` rows in this router.
 **Pattern**: Follow `packages/server/src/routes/profile.ts:341-508`, `packages/server/src/middleware/auth.ts:42-83`, and `packages/server/src/lib/http.ts:9-27`
 **Validate**: `bun run typecheck`
 
@@ -116,8 +116,9 @@ Execute in order. Each task is atomic and independently verifiable.
 **Action**: CREATE
 **Details**: Create a route test suite that mirrors the style of `profile.test.ts` but seeds the skill tree before requests. The test harness should run migrations, create the DB client, call `seedSkillTree(dbClient.db)`, build the app with a test token service, and clean up the temp directory. Add coverage for:
 - unauthenticated `GET /api/skills` and `GET /api/skills/:id` returning `401` / `auth_required`
-- a newly registered user receiving all 25 seeded nodes, with every root node (`prerequisiteIds.length === 0`) marked `available`, deeper nodes like skill `00000000-0000-4000-8000-000000000006` marked `locked`, and the list order matching `aiDeveloperSkillTree.map((node) => node.id)`
-- derived unlock logic after inserting completed prerequisite rows for the current user, including a node that becomes `available` without its own `user_progress` row
+- a newly registered user receiving all 25 seeded nodes, with every skill including root nodes marked `locked` until diagnosis completion, and the list order matching `aiDeveloperSkillTree.map((node) => node.id)`
+- diagnosis completion making root nodes `available`, while deeper nodes like skill `00000000-0000-4000-8000-000000000006` remain `locked` until prerequisites are satisfied
+- derived unlock logic after diagnosis completion and inserting completed prerequisite rows for the current user, including a node that becomes `available` without its own `user_progress` row
 - stored override logic after inserting `inProgress` and `completed` rows for representative nodes, while leaving a downstream dependent node `locked` until all prerequisites are completed
 - `GET /api/skills/:id` returning `200` and the computed `locked` status for a locked node instead of `403`
 - `GET /api/skills/:id` returning `404` / `skill_not_found` for an unknown id
@@ -129,7 +130,7 @@ Use direct `db.insert(userProgress)` setup in the tests rather than adding any n
 ## Testing Strategy
 | Test File | Test Cases | Validates |
 |-----------|-----------|-----------|
-| `packages/server/src/routes/skills.test.ts` | auth required; seeded list returns 25 nodes; root/default lock state; derived availability from completed prerequisites; `inProgress` / `completed` overrides; locked detail returns 200; missing id returns 404; user isolation | The new skills API contract, unlock algorithm, auth behavior, error handling, and seeded test harness |
+| `packages/server/src/routes/skills.test.ts` | auth required; seeded list returns 25 nodes; diagnosis gate lock state; post-diagnosis root availability; derived availability from completed prerequisites; `inProgress` / `completed` overrides; locked detail returns 200; missing id returns 404; user isolation | The new skills API contract, unlock algorithm, auth behavior, error handling, and seeded test harness |
 | `packages/server/src/routes/profile.test.ts` | existing profile + diagnosis suite | The new router mount does not regress existing authenticated route behavior |
 | `packages/server/src/app.test.ts` | existing health/auth smoke tests | App composition still serves the existing `/api` routes after mounting skills |
 

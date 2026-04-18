@@ -11,6 +11,7 @@ import type {
   SkillNodeView,
 } from "@evolith/shared";
 import { describe, expect, test } from "bun:test";
+import { eq } from "drizzle-orm";
 import pino from "pino";
 
 import { createApp } from "../app";
@@ -24,7 +25,7 @@ import {
   aiDeveloperSkillTree,
 } from "../db/seed-data/skill-tree";
 import { seedSkillTree } from "../db/seed";
-import { userProgress } from "../db/schema";
+import { cognitiveProfiles, userProgress } from "../db/schema";
 import { createTokenService } from "../lib/auth/tokens";
 
 interface TestAppContext {
@@ -113,19 +114,6 @@ async function getRequest(
   });
 }
 
-async function postJson(
-  app: TestAppContext["app"],
-  path: string,
-  payload: unknown,
-  accessToken?: string,
-): Promise<Response> {
-  return app.request(path, {
-    method: "POST",
-    headers: createHeaders(accessToken, "application/json"),
-    body: JSON.stringify(payload),
-  });
-}
-
 async function parseJson<TResponse>(response: Response): Promise<TResponse> {
   return (await response.json()) as TResponse;
 }
@@ -134,10 +122,14 @@ async function registerUser(
   app: TestAppContext["app"],
   email = `user-${crypto.randomUUID()}@example.com`,
 ): Promise<RegisteredUser> {
-  const response = await postJson(app, "/api/auth/register", {
-    email,
-    password: "password123",
-    displayName: "Test User",
+  const response = await app.request("/api/auth/register", {
+    method: "POST",
+    headers: createHeaders(undefined, "application/json"),
+    body: JSON.stringify({
+      email,
+      password: "password123",
+      displayName: "Test User",
+    }),
   });
 
   expect(response.status).toBe(201);
@@ -189,6 +181,35 @@ function findSkill(skills: SkillNodeView[], skillId: string): SkillNodeView {
   return skill;
 }
 
+function completeDiagnosisForUser(
+  context: TestAppContext,
+  userId: string,
+): void {
+  context.dbClient.db
+    .update(cognitiveProfiles)
+    .set({ lastDiagnosedAt: "2026-04-19T10:00:00.000Z" })
+    .where(eq(cognitiveProfiles.userId, userId))
+    .run();
+}
+
+function insertCompletedPrerequisitesForLockedSkill(
+  context: TestAppContext,
+  userId: string,
+  startedHourOffset = 1,
+): void {
+  context.dbClient.db.insert(userProgress).values(
+    prerequisiteSkillIdsForLockedSkill.map((skillNodeId, index) => ({
+      id: crypto.randomUUID(),
+      userId,
+      skillNodeId,
+      status: "completed" as const,
+      startedAt: `2026-04-19T0${startedHourOffset + index}:00:00.000Z`,
+      completedAt: `2026-04-19T0${startedHourOffset + index + 1}:30:00.000Z`,
+      score: 90 + index,
+    })),
+  ).run();
+}
+
 describe("skills routes", () => {
   test("rejects unauthenticated skills list access", async () => {
     const context = createTestAppContext();
@@ -218,7 +239,7 @@ describe("skills routes", () => {
     }
   });
 
-  test("returns all seeded skills in authored order with default root and locked states", async () => {
+  test("returns all seeded skills in authored order with every skill locked until diagnosis completion", async () => {
     const context = createTestAppContext();
 
     try {
@@ -244,23 +265,31 @@ describe("skills routes", () => {
     }
   });
 
-  test("derives newly available skills from completed prerequisites without creating local progress rows", async () => {
+  test("makes root skills available after diagnosis completion", async () => {
+    const context = createTestAppContext();
+
+    try {
+      const user = await registerUser(context.app, "skills-unlock@example.com");
+      completeDiagnosisForUser(context, user.userId);
+
+      const result = await getSkills(context.app, user.accessToken);
+      const rootSkill = findSkill(result.body.data.skills, rootSkillIds[0]!);
+      const lockedSkill = findSkill(result.body.data.skills, lockedSkillId);
+
+      expect(result.response.status).toBe(200);
+      expect(rootSkill.status).toBe("available");
+      expect(lockedSkill.status).toBe("locked");
+    } finally {
+      context.cleanup();
+    }
+  });
+
+  test("keeps skills locked after completing prerequisites when diagnosis is incomplete", async () => {
     const context = createTestAppContext();
 
     try {
       const user = await registerUser(context.app, "skills-derived@example.com");
-
-      context.dbClient.db.insert(userProgress).values(
-        prerequisiteSkillIdsForLockedSkill.map((skillNodeId, index) => ({
-          id: crypto.randomUUID(),
-          userId: user.userId,
-          skillNodeId,
-          status: "completed" as const,
-          startedAt: `2026-04-19T0${index + 1}:00:00.000Z`,
-          completedAt: `2026-04-19T0${index + 2}:30:00.000Z`,
-          score: 90 + index,
-        })),
-      ).run();
+      insertCompletedPrerequisitesForLockedSkill(context, user.userId);
 
       const result = await getSkills(context.app, user.accessToken);
       const unlockedSkill = findSkill(result.body.data.skills, lockedSkillId);
@@ -270,6 +299,27 @@ describe("skills routes", () => {
       expect(unlockedSkill.startedAt).toBeNull();
       expect(unlockedSkill.completedAt).toBeNull();
       expect(unlockedSkill.score).toBeNull();
+    } finally {
+      context.cleanup();
+    }
+  });
+
+  test("makes prerequisite-gated skills available after diagnosis completion", async () => {
+    const context = createTestAppContext();
+
+    try {
+      const user = await registerUser(context.app, "skills-derived-available@example.com");
+      completeDiagnosisForUser(context, user.userId);
+      insertCompletedPrerequisitesForLockedSkill(context, user.userId);
+
+      const result = await getSkills(context.app, user.accessToken);
+      const availableSkill = findSkill(result.body.data.skills, lockedSkillId);
+
+      expect(result.response.status).toBe(200);
+      expect(availableSkill.status).toBe("available");
+      expect(availableSkill.startedAt).toBeNull();
+      expect(availableSkill.completedAt).toBeNull();
+      expect(availableSkill.score).toBeNull();
     } finally {
       context.cleanup();
     }
@@ -321,15 +371,16 @@ describe("skills routes", () => {
     }
   });
 
-  test("returns 403 for locked skill details", async () => {
+  test("returns locked skill details with 200 and locked status", async () => {
     const context = createTestAppContext();
 
     try {
       const user = await registerUser(context.app, "skills-detail@example.com");
       const result = await getSkill(context.app, lockedSkillId, user.accessToken);
 
-      expect(result.response.status).toBe(403);
-      expect((result.body as any).error.code).toBe("skill_locked");
+      expect(result.response.status).toBe(200);
+      expect(result.body.data.skill.id).toBe(lockedSkillId);
+      expect(result.body.data.skill.status).toBe("locked");
     } finally {
       context.cleanup();
     }
@@ -360,18 +411,8 @@ describe("skills routes", () => {
     try {
       const firstUser = await registerUser(context.app, "skills-user-one@example.com");
       const secondUser = await registerUser(context.app, "skills-user-two@example.com");
-
-      context.dbClient.db.insert(userProgress).values(
-        prerequisiteSkillIdsForLockedSkill.map((skillNodeId, index) => ({
-          id: crypto.randomUUID(),
-          userId: firstUser.userId,
-          skillNodeId,
-          status: "completed" as const,
-          startedAt: `2026-04-19T0${index + 4}:00:00.000Z`,
-          completedAt: `2026-04-19T0${index + 5}:00:00.000Z`,
-          score: 84 + index,
-        })),
-      ).run();
+      completeDiagnosisForUser(context, firstUser.userId);
+      insertCompletedPrerequisitesForLockedSkill(context, firstUser.userId, 4);
 
       const firstUserResult = await getSkills(context.app, firstUser.accessToken);
       const secondUserResult = await getSkills(context.app, secondUser.accessToken);
@@ -379,7 +420,7 @@ describe("skills routes", () => {
       expect(firstUserResult.response.status).toBe(200);
       expect(secondUserResult.response.status).toBe(200);
       expect(findSkill(firstUserResult.body.data.skills, lockedSkillId).status).toBe(
-        "locked",
+        "available",
       );
       expect(findSkill(secondUserResult.body.data.skills, lockedSkillId).status).toBe(
         "locked",
