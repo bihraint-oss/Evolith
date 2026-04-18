@@ -6,6 +6,12 @@ _Non-obvious patterns, gotchas, and conventions discovered during implementation
 
 ## Architecture Patterns
 
+### Frontend Session & Routing
+- The web app keeps auth state in a module-level `sessionStore` backed by the `evolith.session` `localStorage` key and exposes it through `useSyncExternalStore`.
+- Stored session payloads are shape-validated on read; corrupted or stale JSON is removed instead of being trusted.
+- `ProtectedRoute` only checks for a stored session. The final route choice still happens inside the pages after live `GET /api/profile` reads so diagnosis completion stays server-authoritative.
+- The shared API client retries authenticated requests exactly once after a `401` by calling `POST /api/auth/refresh`, rewriting stored tokens, and replaying the original request. Refresh failure clears storage and surfaces an auth-expired error for page-level redirects.
+
 ### Skill Graph Unlock State
 - The Phase 3 skills read API derives `locked` and `available` on read from `skill_nodes.prerequisites` plus the authenticated user's completed `user_progress` rows.
 - Only persisted `user_progress.status` values of `inProgress` and `completed` should override the derived state; sparse `locked` or `available` rows are intentionally ignored for status computation.
@@ -43,6 +49,14 @@ _Non-obvious patterns, gotchas, and conventions discovered during implementation
 ---
 
 ## Gotchas & Workarounds
+
+### Frontend jsdom Coverage
+- Recharts and responsive layout tests need `matchMedia`, `ResizeObserver`, and `scrollTo` shims in `packages/web/src/test/setup.ts`; without them the dashboard suite fails in jsdom before assertions run.
+- The shared test setup should clear `localStorage` and `sessionStorage` after each case because auth bootstrap reads session state during initial render.
+
+### Diagnosis/Dashboard Gating
+- `/diagnosis` must fetch `GET /api/profile` before calling `POST /api/profile/diagnosis/start`; otherwise completed users can accidentally create a fresh diagnosis session through the resumable start endpoint.
+- `/dashboard` should fetch profile and skills together, but it still needs to redirect incomplete users before rendering the dashboard body so the UI never implies diagnosis is optional.
 
 ### Drizzle SQLite Migrations
 - `drizzle-kit generate` correctly emitted the new `diagnosis_sessions.state` column and updated snapshot metadata, but the generated SQLite migration did not backfill rows derived from `completed_at`; phase work that depends on historical state needs a manual `UPDATE ... WHERE completed_at IS NOT NULL` patch in the generated SQL.
