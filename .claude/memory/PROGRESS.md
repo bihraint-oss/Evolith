@@ -27,7 +27,7 @@
 - [x] 2026-04-18: Task 1 completed — updated `packages/shared/src/types.ts` with single-choice diagnosis DTOs, scored question snapshot types, shared session/result/progress views, and radar data contracts.
 
 ## Phase 3: Skill Graph API
-**Status**: 🚧 In progress
+**Status**: ✅ Done
 
 - [x] 2026-04-19: Review follow-up completed — aligned the authenticated skills read API with validation feedback by keeping both endpoints auth-guarded, preserving seeded id ordering, returning locked detail nodes with `200`, exposing only `status` as the progress overlay field, and refreshing the route-level integration coverage.
 - [x] 2026-04-19: Task 4 completed — added `packages/server/src/routes/skills.test.ts` with integration coverage for auth, diagnosis gating, prerequisite unlock derivation, `inProgress`/`completed` overrides, locked detail reads, missing ids, response shape, and user isolation.
@@ -36,5 +36,6 @@
 - [x] 2026-04-19: Task 1 completed — added shared skill graph DTOs in `packages/shared/src/types.ts` for the skills list/detail responses and `SkillNodeView`.
 
 ## Phase 4: Frontend
-**Status**: ⬜ Not started
-_(Tasks will be detailed when Phase 2+3 are complete)_
+**Status**: 🚧 In progress
+
+- [x] 2026-04-19: Task 1 completed — created the `@evolith/web` workspace manifest, registered `packages/web` in the root workspace, added `dev:web`, updated the root `build` command to invoke the web build after repo typecheck, and refreshed `bun.lock` via `bun install`.

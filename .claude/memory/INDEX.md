@@ -1,9 +1,9 @@
 # Evolith Memory Index
 
 **Last updated**: 2026-04-19
-**Current phase**: Phase 3 In Progress
-**Current focus**: The authenticated Phase 3 skills API is mounted, integration-tested, and aligned with review feedback; awaiting re-review or approval
-**Next steps**: Re-review the `/api/skills` implementation, or request any additional follow-up before approval
+**Current phase**: Phase 4 In Progress
+**Current focus**: Phase 4 frontend work has started; Task 1 added the `packages/web` workspace, frontend dependency set, and root script plumbing
+**Next steps**: Complete Phase 4 Task 2 by expanding the root `tsconfig.json` for TSX, `.d.ts`, JSX, and DOM browser coverage
 
 ---
 
@@ -20,13 +20,13 @@
 
 ## Project State Summary
 
-- **Repo**: Phase 1 backend foundation and Phase 2 diagnosis core loop are implemented; Phase 3 skill graph route work is underway
-- **Branch**: `archon/task-plan-phase3-skill-graph`
+- **Repo**: Phase 1 backend foundation, Phase 2 diagnosis core loop, and Phase 3 skill graph API are implemented; Phase 4 frontend workspace setup is underway
+- **Branch**: `archon/task-plan-phase4-frontend`
 - **PRD**: Validated at `.archon/ralph/evolith-mvp/prd.md`
 - **Archon config**: Codex (gpt-5.4 xhigh) for dev-time AI
 - **Database**: SQLite + Drizzle on Bun
 - **Dependencies**: Installed
-- **Latest completed task**: Phase 3 review follow-up — narrowed the skills response contract to status-only progress data and refreshed integration coverage
+- **Latest completed task**: Phase 4 Task 1 — created the `packages/web` workspace manifest, added frontend package dependencies, and updated the root workspace/build plumbing
 
 ## Phase Status
 
@@ -35,5 +35,5 @@
 | 0 — Planning & PRD | ✅ Done |
 | 1 — Backend Foundation | ✅ Done |
 | 2 — Diagnosis Core Loop | ✅ Done |
-| 3 — Skill Graph API | 🚧 In progress |
-| 4 — Frontend | ⬜ Not started |
+| 3 — Skill Graph API | ✅ Done |
+| 4 — Frontend | 🚧 In progress |
