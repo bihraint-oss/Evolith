@@ -1,0 +1,28 @@
+{
+  "name": "@evolith/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "typecheck": "if find ../../packages -type f \\( -name '*.ts' -o -name '*.tsx' \\) | grep -q .; then tsc --project ../../tsconfig.json --noEmit; else echo 'No TypeScript source files yet'; fi",
+    "lint": "bun run typecheck",
+    "test": "if find ../../packages -type f \\( -name '*.test.ts' -o -name '*.test.tsx' -o -name '*.spec.ts' -o -name '*.spec.tsx' \\) | grep -q .; then bun test; else echo 'No tests yet'; fi",
+    "format:check": "echo 'No formatter configured yet'",
+    "db:generate": "drizzle-kit generate --config drizzle.config.ts",
+    "db:migrate": "bun src/db/migrate.ts",
+    "db:seed": "bun src/db/seed.ts",
+    "validate": "bun run typecheck && bun run lint && bun run test && bun run format:check"
+  },
+  "dependencies": {
+    "@evolith/shared": "workspace:*",
+    "drizzle-orm": "latest",
+    "hono": "latest",
+    "jose": "latest",
+    "pino": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "drizzle-kit": "latest"
+  }
+}

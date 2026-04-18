@@ -1,0 +1,24 @@
+{
+  "name": "evolith",
+  "private": true,
+  "workspaces": [
+    "packages/server",
+    "packages/shared"
+  ],
+  "scripts": {
+    "dev:server": "bun run --cwd packages/server dev",
+    "typecheck": "bun run --cwd packages/server typecheck",
+    "type-check": "bun run typecheck",
+    "lint": "bun run --cwd packages/server lint",
+    "test": "bun run --cwd packages/server test",
+    "format:check": "bun run --cwd packages/server format:check",
+    "db:generate": "bun run --cwd packages/server db:generate",
+    "db:migrate": "bun run --cwd packages/server db:migrate",
+    "db:seed": "bun run --cwd packages/server db:seed",
+    "validate": "bun run --cwd packages/server validate"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "typescript": "latest"
+  }
+}

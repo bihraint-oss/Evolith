@@ -1,0 +1,59 @@
+## Task 10: UPDATE README with local runbook and `curl` verification — COMPLETED
+Date: 2026-04-18
+Files: README.md
+Commit: fb2741a
+---
+
+## Task 9: CREATE automated smoke tests — COMPLETED
+Date: 2026-04-18
+Files: packages/server/src/app.test.ts, packages/server/src/db/seed.test.ts
+Commit: e9f382b
+---
+
+## Task 8: CREATE auth routes and transactional registration flow — COMPLETED
+Date: 2026-04-18
+Files: packages/server/src/routes/auth.ts, packages/server/src/app.ts, packages/server/src/index.ts, packages/server/src/lib/auth/tokens.ts
+Commit: 53e95f5
+---
+
+## Task 7: CREATE auth primitives and middleware — COMPLETED
+Date: 2026-04-18
+Files: packages/server/src/lib/auth/password.ts, packages/server/src/lib/auth/tokens.ts, packages/server/src/middleware/auth.ts
+Commit: 868d90b
+---
+
+## Task 6: CREATE deterministic skill-tree seed data — COMPLETED
+Date: 2026-04-18
+Files: packages/server/src/db/seed-data/skill-tree.ts, packages/server/src/db/seed.ts
+Commit: 18989b1
+---
+
+## Task 5: CREATE migration configuration and initial migration — COMPLETED
+Date: 2026-04-18
+Files: packages/server/drizzle.config.ts, packages/server/src/db/migrate.ts, packages/server/src/db/migrations/0000_massive_calypso.sql, packages/server/src/db/migrations/meta/0000_snapshot.json, packages/server/src/db/migrations/meta/_journal.json
+Commit: 73795a0
+---
+
+## Task 4: CREATE SQLite DB client and schema — COMPLETED
+Date: 2026-04-18
+Files: packages/server/src/db/client.ts, packages/server/src/db/schema.ts
+Commit: 7683cb1
+---
+
+## Task 3: CREATE server package skeleton and app composition — COMPLETED
+Date: 2026-04-18
+Files: packages/server/src/app.ts, packages/server/src/index.ts, packages/server/src/config/env.ts, packages/server/src/lib/http.ts, packages/server/src/lib/logger.ts, packages/server/src/routes/health.ts
+Commit: 18bf581
+---
+
+## Task 2: CREATE shared package and transport types — COMPLETED
+Date: 2026-04-18
+Files: packages/shared/src/index.ts, packages/shared/src/types.ts
+Commit: 41c413c
+---
+
+## Task 1: CREATE root workspace manifests — COMPLETED
+Date: 2026-04-18
+Files: package.json, tsconfig.json, .env.example, packages/server/package.json, packages/shared/package.json, bun.lock
+Commit: 12cc3b0
+---
