@@ -1,3 +1,9 @@
+## Task 3: CREATE `packages/web/src/lib/api.ts` — COMPLETED
+Date: 2026-04-19
+Files: packages/web/src/lib/api.ts, packages/web/src/lib/api.test.ts, packages/web/src/lib/session.tsx
+Commit: 71e8a08
+---
+
 ## Task 2: CREATE `packages/web/package.json` — COMPLETED
 Date: 2026-04-19
 Files: bun.lock, packages/web/package.json, packages/web/tsconfig.json, packages/web/tsconfig.node.json, packages/web/vite.config.ts, packages/web/tailwind.config.ts, packages/web/postcss.config.mjs, packages/web/index.html, packages/web/src/vite-env.d.ts, packages/web/src/main.tsx, packages/web/src/index.css, packages/web/src/test/setup.ts
