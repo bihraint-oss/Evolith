@@ -11,7 +11,7 @@ _Track all API endpoint additions, modifications, and removals._
 
 ---
 
-## [Unreleased] — Phase 3
+## [2026-04-19] — Phase 3 ✅ (PR #3 merged)
 
 ### Activated Endpoints
 

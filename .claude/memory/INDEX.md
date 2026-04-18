@@ -1,9 +1,9 @@
 # Evolith Memory Index
 
 **Last updated**: 2026-04-19
-**Current phase**: Phase 3 In Progress
-**Current focus**: The authenticated Phase 3 skills API is mounted, integration-tested, and aligned with review feedback; awaiting re-review or approval
-**Next steps**: Re-review the `/api/skills` implementation, or request any additional follow-up before approval
+**Current phase**: Phase 3 ✅ Done (merged PR #3)
+**Current focus**: Phase 3 complete, ready to start Phase 4 Frontend
+**Next steps**: Start Phase 4 Frontend implementation
 
 ---
 
@@ -20,13 +20,13 @@
 
 ## Project State Summary
 
-- **Repo**: Phase 1 backend foundation and Phase 2 diagnosis core loop are implemented; Phase 3 skill graph route work is underway
-- **Branch**: `archon/task-plan-phase3-skill-graph`
+- **Repo**: Phase 1, 2, 3 complete — all merged to main
+- **Branch**: `dev`
 - **PRD**: Validated at `.archon/ralph/evolith-mvp/prd.md`
 - **Archon config**: Codex (gpt-5.4 xhigh) for dev-time AI
 - **Database**: SQLite + Drizzle on Bun
 - **Dependencies**: Installed
-- **Latest completed task**: Phase 3 review follow-up — narrowed the skills response contract to status-only progress data and refreshed integration coverage
+- **Latest completed task**: Phase 3 Skill Graph API — PR #3 merged (63f08d0)
 
 ## Phase Status
 
@@ -35,5 +35,5 @@
 | 0 — Planning & PRD | ✅ Done |
 | 1 — Backend Foundation | ✅ Done |
 | 2 — Diagnosis Core Loop | ✅ Done |
-| 3 — Skill Graph API | 🚧 In progress |
+| 3 — Skill Graph API | ✅ Done |
 | 4 — Frontend | ⬜ Not started |

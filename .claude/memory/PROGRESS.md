@@ -27,8 +27,9 @@
 - [x] 2026-04-18: Task 1 completed — updated `packages/shared/src/types.ts` with single-choice diagnosis DTOs, scored question snapshot types, shared session/result/progress views, and radar data contracts.
 
 ## Phase 3: Skill Graph API
-**Status**: 🚧 In progress
+**Status**: ✅ Done
 
+- [x] 2026-04-19: Phase 3 complete — PR #3 merged (63f08d0)
 - [x] 2026-04-19: Review follow-up completed — aligned the authenticated skills read API with validation feedback by keeping both endpoints auth-guarded, preserving seeded id ordering, returning locked detail nodes with `200`, exposing only `status` as the progress overlay field, and refreshing the route-level integration coverage.
 - [x] 2026-04-19: Task 4 completed — added `packages/server/src/routes/skills.test.ts` with integration coverage for auth, diagnosis gating, prerequisite unlock derivation, `inProgress`/`completed` overrides, locked detail reads, missing ids, response shape, and user isolation.
 - [x] 2026-04-19: Task 3 completed — mounted `createSkillsRouter` under the shared `/api` prefix in `packages/server/src/app.ts`, activating the authenticated skills list and detail endpoints.
