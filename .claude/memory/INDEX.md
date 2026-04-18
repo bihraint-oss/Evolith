@@ -2,8 +2,8 @@
 
 **Last updated**: 2026-04-19
 **Current phase**: Phase 2 Complete
-**Current focus**: Phase 2 backend diagnosis loop is implemented and validated; next implementation work moves to Phase 3
-**Next steps**: Begin Phase 3 Skill Graph API planning and task breakdown
+**Current focus**: Phase 2 backend diagnosis review follow-ups are applied and fully validated on the PR branch
+**Next steps**: Begin Phase 3 Skill Graph API planning and decide whether to add inline diagnosis-route JSDoc near the public exports
 
 ---
 
@@ -26,7 +26,7 @@
 - **Archon config**: Codex (gpt-5.4 xhigh) for dev-time AI
 - **Database**: SQLite + Drizzle on Bun
 - **Dependencies**: Installed
-- **Latest completed task**: Added `packages/server/src/routes/profile.test.ts` with end-to-end coverage for the authenticated profile and diagnosis lifecycle
+- **Latest completed task**: Closed PR #2 review follow-ups for diagnosis session integrity, request-body regression coverage, and Phase 2 documentation drift
 
 ## Phase Status
 

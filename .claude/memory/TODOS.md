@@ -17,6 +17,7 @@
 
 ## Phase 2 (After Phase 1)
 
+- [ ] Add inline JSDoc for diagnosis route/session invariants near the public exports
 - [ ] Implement diagnosis scoring algorithm
 - [ ] Implement AI provider interface (abstract)
 - [ ] Implement profile routes (GET profile, diagnosis lifecycle)
