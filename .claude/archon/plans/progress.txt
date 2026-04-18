@@ -1,3 +1,9 @@
+## Task 6: CREATE `packages/web/src/pages/Dashboard.tsx` — COMPLETED
+Date: 2026-04-19
+Files: packages/web/src/components/RadarChart.tsx, packages/web/src/components/SkillMap.tsx, packages/web/src/pages/Dashboard.tsx, packages/web/src/pages/Dashboard.test.tsx
+Commit: d1dd1ad
+---
+
 ## Task 5: CREATE `packages/web/src/pages/Diagnosis.tsx` — COMPLETED
 Date: 2026-04-19
 Files: packages/web/src/pages/Diagnosis.tsx, packages/web/src/pages/Diagnosis.test.tsx
