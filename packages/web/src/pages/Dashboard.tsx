@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import RadarChart from "../components/RadarChart";
 import SkillMap from "../components/SkillMap";
 import { ApiClientError, getProfile, getSkills } from "../lib/api";
+import { getErrorLogDetails, logErrorEvent } from "../lib/logging";
 import { useSession } from "../lib/session";
 
 interface DashboardData {
@@ -24,6 +25,9 @@ function getErrorMessage(error: unknown, fallbackMessage: string): string {
   return fallbackMessage;
 }
 
+/**
+ * Formats the last completed diagnosis timestamp and preserves the incomplete-session sentinel.
+ */
 function formatLastDiagnosedAt(value: string | null): string {
   if (value === null) {
     return "Not completed yet";
@@ -42,6 +46,9 @@ function countSkillsByStatus(
   return skills.filter((skill) => skill.status === status).length;
 }
 
+/**
+ * Loads the saved diagnosis snapshot and skill roadmap for authenticated users.
+ */
 export function DashboardPage(): React.JSX.Element {
   const navigate = useNavigate();
   const { clearSession, session } = useSession();
@@ -88,11 +95,23 @@ export function DashboardPage(): React.JSX.Element {
         }
 
         if (error instanceof ApiClientError && error.isAuthExpired) {
+          logErrorEvent("dashboard.bootstrap_auth_expired", {
+            domain: "dashboard",
+            action: "bootstrap",
+            state: "auth_expired",
+            ...getErrorLogDetails(error),
+          });
           clearSession();
           navigate("/auth", { replace: true });
           return;
         }
 
+        logErrorEvent("dashboard.bootstrap_error", {
+          domain: "dashboard",
+          action: "bootstrap",
+          state: "unknown_error",
+          ...getErrorLogDetails(error),
+        });
         setErrorMessage(
           getErrorMessage(
             error,

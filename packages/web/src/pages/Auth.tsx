@@ -2,6 +2,7 @@ import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { ApiClientError, getProfile, login, register } from "../lib/api";
+import { getErrorLogDetails, logErrorEvent } from "../lib/logging";
 import { createStoredSession, useSession } from "../lib/session";
 
 type AuthMode = "register" | "login";
@@ -30,6 +31,9 @@ function getErrorMessage(error: unknown, fallbackMessage: string): string {
   return fallbackMessage;
 }
 
+/**
+ * Renders the auth entry flow and routes returning users from live profile state.
+ */
 export function AuthPage(): React.JSX.Element {
   const navigate = useNavigate();
   const { clearSession, session, setSession } = useSession();
@@ -71,7 +75,20 @@ export function AuthPage(): React.JSX.Element {
         }
 
         if (error instanceof ApiClientError && error.isAuthExpired) {
+          logErrorEvent("auth.bootstrap_auth_expired", {
+            domain: "auth",
+            action: "bootstrap",
+            state: "auth_expired",
+            ...getErrorLogDetails(error),
+          });
           clearSession();
+        } else {
+          logErrorEvent("auth.bootstrap_error", {
+            domain: "auth",
+            action: "bootstrap",
+            state: "unknown_error",
+            ...getErrorLogDetails(error),
+          });
         }
 
         setRedirectError(
@@ -141,7 +158,22 @@ export function AuthPage(): React.JSX.Element {
       await routeFromProfile();
     } catch (error) {
       if (error instanceof ApiClientError && error.isAuthExpired) {
+        logErrorEvent("auth.submit_auth_expired", {
+          domain: "auth",
+          action: "submit",
+          state: "auth_expired",
+          mode,
+          ...getErrorLogDetails(error),
+        });
         clearSession();
+      } else {
+        logErrorEvent("auth.submit_error", {
+          domain: "auth",
+          action: "submit",
+          state: "unknown_error",
+          mode,
+          ...getErrorLogDetails(error),
+        });
       }
 
       setErrorMessage(

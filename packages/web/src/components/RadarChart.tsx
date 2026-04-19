@@ -7,6 +7,9 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+/**
+ * Supplies the saved radar values rendered on the dashboard.
+ */
 export interface RadarChartProps {
   data: DiagnosisRadarData;
 }
@@ -23,6 +26,9 @@ function formatDimensionLabel(dimension: CognitiveDimension): string {
   return dimensionLabels[dimension];
 }
 
+/**
+ * Renders the diagnosis radar chart alongside the raw dimension scores.
+ */
 export function RadarChart(props: RadarChartProps): React.JSX.Element {
   return (
     <section className="rounded-[2rem] border border-clay-200 bg-white p-6 shadow-sm">

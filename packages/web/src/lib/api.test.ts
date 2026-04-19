@@ -84,6 +84,7 @@ const profileResponse: GetProfileResponse = {
 describe("createApiClient", () => {
   beforeEach(() => {
     sessionStore.clearSession();
+    vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
   it("parses the standard success envelope for auth requests", async () => {
@@ -223,6 +224,132 @@ describe("createApiClient", () => {
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
+  it("throws with status 0 when fetch fails before receiving a response", async () => {
+    const fetchMock = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
+    const client = createApiClient({
+      baseUrl: API_BASE_URL,
+      fetch: fetchMock as typeof fetch,
+    });
+
+    await expect(
+      client.login({
+        email: "ada@example.com",
+        password: "password123",
+      }),
+    ).rejects.toMatchObject({
+      message: "The API request could not be completed.",
+      status: 0,
+    });
+  });
+
+  it("throws when the API returns a non-JSON response", async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(
+      new Response("not json", {
+        status: 200,
+        headers: {
+          "Content-Type": "text/html",
+        },
+      }),
+    );
+    const client = createApiClient({
+      baseUrl: API_BASE_URL,
+      fetch: fetchMock as typeof fetch,
+    });
+
+    await expect(
+      client.login({
+        email: "ada@example.com",
+        password: "password123",
+      }),
+    ).rejects.toMatchObject({
+      message: "The API returned an invalid JSON response.",
+      status: 200,
+    });
+  });
+
+  it("throws when a success response payload is missing the data field", async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(
+      createJsonResponse({
+        user,
+        tokens: authResponse.tokens,
+      }),
+    );
+    const client = createApiClient({
+      baseUrl: API_BASE_URL,
+      fetch: fetchMock as typeof fetch,
+    });
+
+    await expect(
+      client.login({
+        email: "ada@example.com",
+        password: "password123",
+      }),
+    ).rejects.toMatchObject({
+      message: "The API returned an invalid success payload.",
+      status: 200,
+    });
+  });
+
+  it("falls back to a generic message when the error envelope is malformed", async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(
+      createJsonResponse(
+        {
+          error: {
+            code: "server_error",
+          },
+        },
+        500,
+      ),
+    );
+    const client = createApiClient({
+      baseUrl: API_BASE_URL,
+      fetch: fetchMock as typeof fetch,
+    });
+
+    await expect(
+      client.login({
+        email: "ada@example.com",
+        password: "password123",
+      }),
+    ).rejects.toMatchObject({
+      message: "Request failed with status 500.",
+      status: 500,
+    });
+  });
+
+  it("defaults the API base URL to /api when no override is provided", async () => {
+    const env = import.meta.env as Record<string, string | undefined>;
+    const hadConfiguredBaseUrl = Object.prototype.hasOwnProperty.call(
+      env,
+      "VITE_API_BASE_URL",
+    );
+    const originalBaseUrl = env.VITE_API_BASE_URL;
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(createSuccessResponse(authResponse, 201));
+
+    delete env.VITE_API_BASE_URL;
+
+    try {
+      const client = createApiClient({
+        fetch: fetchMock as typeof fetch,
+      });
+
+      await client.login({
+        email: "ada@example.com",
+        password: "password123",
+      });
+
+      expect(fetchMock.mock.calls[0]?.[0]).toBe("/api/auth/login");
+    } finally {
+      if (hadConfiguredBaseUrl) {
+        env.VITE_API_BASE_URL = originalBaseUrl;
+      } else {
+        delete env.VITE_API_BASE_URL;
+      }
+    }
+  });
+
   it("clears the stored session when refresh fails and throws auth expired", async () => {
     sessionStore.setSession(createStoredSession(authResponse));
 
@@ -247,5 +374,33 @@ describe("createApiClient", () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(sessionStore.getSession()).toBeNull();
+  });
+
+  it("keeps the stored session when refresh fails with a retryable error", async () => {
+    const storedSession = createStoredSession(authResponse);
+    sessionStore.setSession(storedSession);
+
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        createErrorResponse("Invalid access token", 401, "invalid_token"),
+      )
+      .mockResolvedValueOnce(
+        createErrorResponse("Refresh service unavailable", 503, "server_error"),
+      );
+    const client = createApiClient({
+      baseUrl: API_BASE_URL,
+      fetch: fetchMock as typeof fetch,
+    });
+
+    await expect(client.getProfile()).rejects.toMatchObject({
+      code: "server_error",
+      isAuthExpired: false,
+      message: "Refresh service unavailable",
+      status: 503,
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(sessionStore.getSession()).toEqual(storedSession);
   });
 });

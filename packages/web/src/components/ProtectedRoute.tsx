@@ -2,6 +2,9 @@ import { Navigate, Outlet } from "react-router-dom";
 
 import { useSession } from "../lib/session";
 
+/**
+ * Redirects anonymous visitors to `/auth` before rendering protected routes.
+ */
 export function ProtectedRoute(): React.JSX.Element {
   const { session } = useSession();
 

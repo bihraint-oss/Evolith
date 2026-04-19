@@ -84,8 +84,12 @@ async function renderAuthPage(options: {
   fetchMock: ReturnType<typeof vi.fn>;
   withStoredSession?: boolean;
 }) {
-  vi.resetModules();
-  vi.stubGlobal("fetch", options.fetchMock);
+  vi.resetModules?.();
+  Object.defineProperty(globalThis, "fetch", {
+    configurable: true,
+    value: options.fetchMock,
+    writable: true,
+  });
 
   const [
     { default: AuthPage },
@@ -122,7 +126,7 @@ async function renderAuthPage(options: {
 
 describe("AuthPage", () => {
   beforeEach(() => {
-    vi.unstubAllGlobals();
+    vi.unstubAllGlobals?.();
   });
 
   it("routes a new registration to diagnosis after checking the profile", async () => {

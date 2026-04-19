@@ -123,8 +123,12 @@ async function renderDashboardPage(options: {
   fetchMock: ReturnType<typeof vi.fn>;
   withStoredSession?: boolean;
 }) {
-  vi.resetModules();
-  vi.stubGlobal("fetch", options.fetchMock);
+  vi.resetModules?.();
+  Object.defineProperty(globalThis, "fetch", {
+    configurable: true,
+    value: options.fetchMock,
+    writable: true,
+  });
 
   const [
     { default: DashboardPage },
@@ -171,7 +175,7 @@ function getSkillItem(name: string): HTMLElement {
 
 describe("DashboardPage", () => {
   beforeEach(() => {
-    vi.unstubAllGlobals();
+    vi.unstubAllGlobals?.();
   });
 
   it("redirects diagnosis-incomplete users back to /diagnosis", async () => {

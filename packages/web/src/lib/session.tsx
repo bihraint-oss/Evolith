@@ -6,6 +6,11 @@ import {
   useSyncExternalStore,
 } from "react";
 
+import { getErrorLogDetails, logErrorEvent } from "./logging";
+
+/**
+ * Serializable browser session state derived from a successful auth response.
+ */
 export interface StoredSession {
   user: PublicUser;
   accessToken: string;
@@ -22,7 +27,10 @@ interface SessionContextValue {
 
 type SessionListener = () => void;
 
-const SESSION_STORAGE_KEY = "evolith.session";
+/**
+ * localStorage key used to persist the authenticated browser session.
+ */
+export const SESSION_STORAGE_KEY = "evolith.session";
 
 const SessionContext = createContext<SessionContextValue | null>(null);
 const listeners = new Set<SessionListener>();
@@ -59,6 +67,9 @@ function isStoredSession(value: unknown): value is StoredSession {
   );
 }
 
+/**
+ * Restores the persisted session when it matches the expected serialized shape.
+ */
 export function readStoredSession(): StoredSession | null {
   const storage = getStorage();
 
@@ -76,17 +87,31 @@ export function readStoredSession(): StoredSession | null {
     const parsedSession = JSON.parse(serializedSession) as unknown;
 
     if (!isStoredSession(parsedSession)) {
+      logErrorEvent("session.readStoredSession_invalid_payload", {
+        domain: "session",
+        action: "readStoredSession",
+        state: "invalid_payload",
+      });
       storage.removeItem(SESSION_STORAGE_KEY);
       return null;
     }
 
     return parsedSession;
-  } catch {
+  } catch (error) {
+    logErrorEvent("session.readStoredSession_parse_error", {
+      domain: "session",
+      action: "readStoredSession",
+      state: "json_parse_failed",
+      ...getErrorLogDetails(error),
+    });
     storage.removeItem(SESSION_STORAGE_KEY);
     return null;
   }
 }
 
+/**
+ * Persists the current authenticated session for later reloads.
+ */
 export function writeStoredSession(session: StoredSession): void {
   const storage = getStorage();
 
@@ -97,6 +122,9 @@ export function writeStoredSession(session: StoredSession): void {
   storage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
 }
 
+/**
+ * Removes any persisted browser session from storage.
+ */
 export function clearStoredSession(): void {
   const storage = getStorage();
 
@@ -126,6 +154,9 @@ if (typeof window !== "undefined") {
   });
 }
 
+/**
+ * In-memory session store that keeps React state synchronized with localStorage.
+ */
 export const sessionStore = {
   subscribe(listener: SessionListener): () => void {
     listeners.add(listener);
@@ -149,6 +180,9 @@ export const sessionStore = {
   },
 };
 
+/**
+ * Converts an auth response into the browser session shape used across the app.
+ */
 export function createStoredSession(
   response: Pick<AuthResponse, "user" | "tokens">,
 ): StoredSession {
@@ -160,6 +194,9 @@ export function createStoredSession(
   };
 }
 
+/**
+ * Provides session state and mutation helpers to the routed React tree.
+ */
 export function SessionProvider(props: { children: ReactNode }): ReactNode {
   const session = useSyncExternalStore(
     sessionStore.subscribe,
@@ -181,6 +218,9 @@ export function SessionProvider(props: { children: ReactNode }): ReactNode {
   );
 }
 
+/**
+ * Returns the active session context for authenticated routing and mutations.
+ */
 export function useSession(): SessionContextValue {
   const value = useContext(SessionContext);
 
@@ -190,5 +230,3 @@ export function useSession(): SessionContextValue {
 
   return value;
 }
-
-export { SESSION_STORAGE_KEY };

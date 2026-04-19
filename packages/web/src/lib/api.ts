@@ -13,10 +13,17 @@ import type {
   StartDiagnosisResponse,
 } from "@evolith/shared";
 
+import { getErrorLogDetails, logErrorEvent } from "./logging";
 import { sessionStore, type StoredSession } from "./session";
 
+/**
+ * Error code emitted when a token refresh confirms the session can no longer be reused.
+ */
 export const AUTH_EXPIRED_ERROR_CODE = "auth_expired";
 
+/**
+ * Represents a typed failure returned or synthesized by the web API client.
+ */
 export class ApiClientError extends Error {
   readonly code: string | undefined;
   readonly isAuthExpired: boolean;
@@ -38,12 +45,18 @@ export class ApiClientError extends Error {
   }
 }
 
+/**
+ * Describes the persistence hooks the API client uses for authenticated requests.
+ */
 export interface SessionStoreAdapter {
   getSession(): StoredSession | null;
   setSession(session: StoredSession): void;
   clearSession(): void;
 }
 
+/**
+ * Configures the API client for runtime use or tests.
+ */
 export interface ApiClientOptions {
   baseUrl?: string;
   fetch?: typeof fetch;
@@ -98,7 +111,15 @@ async function parseEnvelope<TData>(response: Response): Promise<TData> {
 
   try {
     payload = await response.json();
-  } catch {
+  } catch (error) {
+    logErrorEvent("api.parseEnvelope_error", {
+      domain: "api",
+      action: "parseEnvelope",
+      state: "json_parse_failed",
+      status: response.status,
+      url: response.url,
+      ...getErrorLogDetails(error),
+    });
     throw new ApiClientError("The API returned an invalid JSON response.", {
       status: response.status,
     });
@@ -106,6 +127,13 @@ async function parseEnvelope<TData>(response: Response): Promise<TData> {
 
   if (response.ok) {
     if (!isApiSuccessResponse<TData>(payload)) {
+      logErrorEvent("api.parseEnvelope_invalid_success_payload", {
+        domain: "api",
+        action: "parseEnvelope",
+        state: "invalid_success_payload",
+        status: response.status,
+        url: response.url,
+      });
       throw new ApiClientError("The API returned an invalid success payload.", {
         status: response.status,
       });
@@ -115,20 +143,38 @@ async function parseEnvelope<TData>(response: Response): Promise<TData> {
   }
 
   if (isApiErrorResponse(payload)) {
+    logErrorEvent("api.parseEnvelope_api_error", {
+      domain: "api",
+      action: "parseEnvelope",
+      state: "api_error",
+      errorCode: payload.error.code,
+      errorMessage: payload.error.message,
+      status: response.status,
+      url: response.url,
+    });
     throw new ApiClientError(payload.error.message, {
       status: response.status,
       code: payload.error.code,
     });
   }
 
+  logErrorEvent("api.parseEnvelope_invalid_error_payload", {
+    domain: "api",
+    action: "parseEnvelope",
+    state: "invalid_error_payload",
+    status: response.status,
+    url: response.url,
+  });
   throw new ApiClientError(`Request failed with status ${response.status}.`, {
     status: response.status,
   });
 }
 
+/**
+ * Creates a typed client for the Evolith HTTP API with session refresh handling.
+ */
 export function createApiClient(options: ApiClientOptions = {}) {
   const baseUrl = getApiBaseUrl(options.baseUrl);
-  const fetchImpl = options.fetch ?? fetch;
   const storage = options.sessionStore ?? sessionStore;
 
   async function sendRequest<TData, TBody = undefined>(
@@ -170,8 +216,18 @@ export function createApiClient(options: ApiClientOptions = {}) {
     let response: Response;
 
     try {
+      const fetchImpl = options.fetch ?? fetch;
       response = await fetchImpl(buildUrl(baseUrl, path), requestInit);
-    } catch {
+    } catch (error) {
+      logErrorEvent("api.sendRequest_error", {
+        domain: "api",
+        action: "sendRequest",
+        state: "request_failed",
+        method,
+        path,
+        url: buildUrl(baseUrl, path),
+        ...getErrorLogDetails(error),
+      });
       throw new ApiClientError("The API request could not be completed.", {
         status: 0,
       });
@@ -237,9 +293,25 @@ export function createApiClient(options: ApiClientOptions = {}) {
       storage.setSession(nextSession);
 
       return nextSession;
-    } catch {
-      storage.clearSession();
-      return null;
+    } catch (error) {
+      if (error instanceof ApiClientError && error.status === 401) {
+        logErrorEvent("api.refreshSession_auth_expired", {
+          domain: "api",
+          action: "refreshSession",
+          state: "auth_expired",
+          ...getErrorLogDetails(error),
+        });
+        storage.clearSession();
+        return null;
+      }
+
+      logErrorEvent("api.refreshSession_error", {
+        domain: "api",
+        action: "refreshSession",
+        state: "request_failed",
+        ...getErrorLogDetails(error),
+      });
+      throw error;
     }
   }
 
@@ -294,12 +366,36 @@ export function createApiClient(options: ApiClientOptions = {}) {
   };
 }
 
+/**
+ * Shared singleton API client for browser components.
+ */
 export const apiClient = createApiClient();
 
+/**
+ * Submits one answer for the active diagnosis session.
+ */
 export const answerDiagnosis = apiClient.answerDiagnosis;
+/**
+ * Loads the authenticated user's live profile and diagnosis state.
+ */
 export const getProfile = apiClient.getProfile;
+/**
+ * Loads the authored skill roadmap with user progress state.
+ */
 export const getSkills = apiClient.getSkills;
+/**
+ * Exchanges email credentials for a new authenticated session.
+ */
 export const login = apiClient.login;
+/**
+ * Exchanges a refresh token for a fresh access token pair.
+ */
 export const refresh = apiClient.refresh;
+/**
+ * Creates a new account and returns the initial authenticated session.
+ */
 export const register = apiClient.register;
+/**
+ * Starts or resumes the user's diagnosis flow.
+ */
 export const startDiagnosis = apiClient.startDiagnosis;

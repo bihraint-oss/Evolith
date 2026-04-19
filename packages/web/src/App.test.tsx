@@ -89,6 +89,11 @@ function writeStoredSession(): void {
       tokenType: "Bearer",
     }),
   );
+  window.dispatchEvent(
+    new StorageEvent("storage", {
+      key: SESSION_STORAGE_KEY,
+    }),
+  );
 }
 
 async function renderApp(options: {
@@ -96,14 +101,18 @@ async function renderApp(options: {
   initialEntry?: string;
   withStoredSession?: boolean;
 }) {
-  vi.resetModules();
+  vi.resetModules?.();
   localStorage.clear();
 
   if (options.withStoredSession) {
     writeStoredSession();
   }
 
-  vi.stubGlobal("fetch", options.fetchMock);
+  Object.defineProperty(globalThis, "fetch", {
+    configurable: true,
+    value: options.fetchMock,
+    writable: true,
+  });
 
   const [{ default: App }, { SessionProvider }, { MemoryRouter }] =
     await Promise.all([

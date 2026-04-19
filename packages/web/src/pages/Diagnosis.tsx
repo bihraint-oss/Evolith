@@ -8,6 +8,7 @@ import {
   getProfile,
   startDiagnosis,
 } from "../lib/api";
+import { getErrorLogDetails, logErrorEvent } from "../lib/logging";
 import { useSession } from "../lib/session";
 
 function getErrorMessage(error: unknown, fallbackMessage: string): string {
@@ -22,10 +23,16 @@ function getErrorMessage(error: unknown, fallbackMessage: string): string {
   return fallbackMessage;
 }
 
+/**
+ * Converts zero-based progress counters into the one-based label shown in the UI.
+ */
 function getQuestionNumber(session: InProgressDiagnosisSessionView): number {
   return session.progress.answeredQuestions + 1;
 }
 
+/**
+ * Loads, resumes, and submits the browser diagnosis flow for the signed-in user.
+ */
 export function DiagnosisPage(): React.JSX.Element {
   const navigate = useNavigate();
   const { clearSession, session } = useSession();
@@ -76,11 +83,23 @@ export function DiagnosisPage(): React.JSX.Element {
         }
 
         if (error instanceof ApiClientError && error.isAuthExpired) {
+          logErrorEvent("diagnosis.bootstrap_auth_expired", {
+            domain: "diagnosis",
+            action: "bootstrap",
+            state: "auth_expired",
+            ...getErrorLogDetails(error),
+          });
           clearSession();
           navigate("/auth", { replace: true });
           return;
         }
 
+        logErrorEvent("diagnosis.bootstrap_error", {
+          domain: "diagnosis",
+          action: "bootstrap",
+          state: "unknown_error",
+          ...getErrorLogDetails(error),
+        });
         setErrorMessage(
           getErrorMessage(
             error,
@@ -131,11 +150,25 @@ export function DiagnosisPage(): React.JSX.Element {
       setSelectedChoiceId("");
     } catch (error) {
       if (error instanceof ApiClientError && error.isAuthExpired) {
+        logErrorEvent("diagnosis.submit_auth_expired", {
+          domain: "diagnosis",
+          action: "submit",
+          state: "auth_expired",
+          sessionId: diagnosisSession.id,
+          ...getErrorLogDetails(error),
+        });
         clearSession();
         navigate("/auth", { replace: true });
         return;
       }
 
+      logErrorEvent("diagnosis.submit_error", {
+        domain: "diagnosis",
+        action: "submit",
+        state: "unknown_error",
+        sessionId: diagnosisSession.id,
+        ...getErrorLogDetails(error),
+      });
       setErrorMessage(
         getErrorMessage(
           error,

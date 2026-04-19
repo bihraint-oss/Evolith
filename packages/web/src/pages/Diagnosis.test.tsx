@@ -149,8 +149,12 @@ async function renderDiagnosisPage(options: {
   fetchMock: ReturnType<typeof vi.fn>;
   withStoredSession?: boolean;
 }) {
-  vi.resetModules();
-  vi.stubGlobal("fetch", options.fetchMock);
+  vi.resetModules?.();
+  Object.defineProperty(globalThis, "fetch", {
+    configurable: true,
+    value: options.fetchMock,
+    writable: true,
+  });
 
   const [
     { default: DiagnosisPage },
@@ -183,7 +187,7 @@ async function renderDiagnosisPage(options: {
 
 describe("DiagnosisPage", () => {
   beforeEach(() => {
-    vi.unstubAllGlobals();
+    vi.unstubAllGlobals?.();
   });
 
   it("starts a new diagnosis session after confirming the profile is incomplete", async () => {

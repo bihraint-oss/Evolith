@@ -6,6 +6,9 @@ import AuthPage from "./pages/Auth";
 import DashboardPage from "./pages/Dashboard";
 import DiagnosisPage from "./pages/Diagnosis";
 
+/**
+ * Declares the top-level browser routes for auth, diagnosis, and dashboard flows.
+ */
 export function App(): React.JSX.Element {
   return (
     <Routes>

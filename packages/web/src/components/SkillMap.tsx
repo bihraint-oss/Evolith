@@ -4,6 +4,9 @@ import type {
   UserProgressStatus,
 } from "@evolith/shared";
 
+/**
+ * Supplies the authored skills plus user progress state rendered on the dashboard.
+ */
 export interface SkillMapProps {
   skills: SkillNodeView[];
 }
@@ -57,6 +60,9 @@ function getStatusSummary(
   return "Still locked until an earlier requirement is satisfied.";
 }
 
+/**
+ * Renders the authored skill roadmap with prerequisite-aware status messaging.
+ */
 export function SkillMap(props: SkillMapProps): React.JSX.Element {
   const skillNameById = new Map(
     props.skills.map((skill) => [skill.id, skill.name] as const),
@@ -72,7 +78,8 @@ export function SkillMap(props: SkillMapProps): React.JSX.Element {
           Ordered by the authored API sequence
         </h2>
         <p className="text-sm text-ink-700">
-          Status and prerequisite explanations come directly from the current skills contract.
+          Skill status comes from the current contract. Prerequisite names are resolved from the
+          authored skill list so locked skills explain which requirements are unmet.
         </p>
       </div>
 
