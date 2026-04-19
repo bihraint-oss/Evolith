@@ -112,11 +112,38 @@ export function AuthPage(): React.JSX.Element {
   }, [bootstrapAttempt, clearSession, navigate]);
 
   async function routeFromProfile(): Promise<void> {
-    const profile = await getProfile();
+    try {
+      const profile = await getProfile();
 
-    navigate(profile.hasCompletedDiagnosis ? "/dashboard" : "/diagnosis", {
-      replace: true,
-    });
+      navigate(profile.hasCompletedDiagnosis ? "/dashboard" : "/diagnosis", {
+        replace: true,
+      });
+    } catch (error) {
+      if (error instanceof ApiClientError && error.isAuthExpired) {
+        logErrorEvent("auth.route_profile_auth_expired", {
+          domain: "auth",
+          action: "routeProfile",
+          state: "auth_expired",
+          ...getErrorLogDetails(error),
+        });
+        clearSession();
+        setErrorMessage("Your session has expired. Please sign in again.");
+      } else {
+        logErrorEvent("auth.route_profile_error", {
+          domain: "auth",
+          action: "routeProfile",
+          state: "unknown_error",
+          ...getErrorLogDetails(error),
+        });
+        setErrorMessage(
+          getErrorMessage(
+            error,
+            "We could not load your profile. Please try again.",
+          ),
+        );
+      }
+      throw error; // Re-throw so handleSubmit's finally can reset isSubmitting
+    }
   }
 
   function updateField(
@@ -154,9 +181,37 @@ export function AuthPage(): React.JSX.Element {
               password: formState.password,
             });
 
-      setSession(createStoredSession(authResponse));
-      await routeFromProfile();
+      // Dedicated inner try/catch for routeFromProfile to prevent its error
+      // message from being overwritten by the outer catch (which uses
+      // "We could not sign you in" — inappropriate after successful auth)
+      try {
+        setSession(createStoredSession(authResponse));
+        await routeFromProfile();
+      } catch (error) {
+        // Errors from routeFromProfile: auth was successful but profile load failed.
+        // routeFromProfile already set the appropriate error message.
+        // Log and clear session if auth expired, but do NOT overwrite the message.
+        if (error instanceof ApiClientError && error.isAuthExpired) {
+          logErrorEvent("auth.submit_auth_expired", {
+            domain: "auth",
+            action: "submit",
+            state: "auth_expired",
+            mode,
+            ...getErrorLogDetails(error),
+          });
+          clearSession();
+        } else {
+          logErrorEvent("auth.submit_error", {
+            domain: "auth",
+            action: "submit",
+            state: "unknown_error",
+            mode,
+            ...getErrorLogDetails(error),
+          });
+        }
+      }
     } catch (error) {
+      // Auth-level errors (register/login itself failed): use "We could not sign you in"
       if (error instanceof ApiClientError && error.isAuthExpired) {
         logErrorEvent("auth.submit_auth_expired", {
           domain: "auth",
@@ -166,6 +221,7 @@ export function AuthPage(): React.JSX.Element {
           ...getErrorLogDetails(error),
         });
         clearSession();
+        setErrorMessage("Your session has expired. Please sign in again.");
       } else {
         logErrorEvent("auth.submit_error", {
           domain: "auth",
@@ -174,11 +230,10 @@ export function AuthPage(): React.JSX.Element {
           mode,
           ...getErrorLogDetails(error),
         });
+        setErrorMessage(
+          getErrorMessage(error, "We could not sign you in. Please try again."),
+        );
       }
-
-      setErrorMessage(
-        getErrorMessage(error, "We could not sign you in. Please try again."),
-      );
     } finally {
       setIsSubmitting(false);
     }

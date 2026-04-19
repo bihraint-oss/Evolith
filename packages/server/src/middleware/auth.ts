@@ -25,13 +25,6 @@ export interface AuthMiddlewareOptions {
   logger?: Logger;
 }
 
-function serializeError(error: unknown): { message: string; name?: string } {
-  if (error instanceof Error) {
-    return { name: error.name, message: error.message };
-  }
-  return { message: String(error) };
-}
-
 export function extractBearerToken(
   authorizationHeader: string | undefined,
 ): string | null {
@@ -83,7 +76,9 @@ export function createAuthMiddleware(
       options.logger?.error(
         {
           event: "auth.middleware_error",
-          error: serializeError(error),
+          error: error instanceof Error
+            ? { name: error.name, message: error.message }
+            : { message: String(error) },
         },
         "Unexpected error in auth middleware",
       );
