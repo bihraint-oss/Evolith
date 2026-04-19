@@ -1,9 +1,9 @@
 # Evolith Memory Index
 
 **Last updated**: 2026-04-19
-**Current phase**: Phase 4 Complete
-**Current focus**: The full-stack MVP browser loop is implemented in `packages/web`, documented, and covered by frontend/backend validation
-**Next steps**: Review the completed Phase 4 deliverable or pick up the remaining follow-up items in `TODOS.md` such as diagnosis JSDoc, explicit re-diagnosis UX, or richer skill views
+**Current phase**: Phase 4 Complete + Bug Fixes (3 post-launch bugs fixed via GitHub issues #5-#10)
+**Current focus**: MVP browser flow working end-to-end; three CORS/API/routing bugs fixed post-launch
+**Next steps**: Test the full browser flow in a fresh window at http://localhost:5173
 
 ---
 

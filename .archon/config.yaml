@@ -1,6 +1,6 @@
 # Evolith Project Configuration
-# Mixed provider strategy: Codex (complex/building) + GLM (simple/reviewing)
-# Builder (Codex) ≠ Reviewer (GLM) — different models for different perspectives
+# Codex-first workflow strategy for this repo
+# All project workflows should run through Codex unless a specific exception is introduced later
 
 assistant: codex
 

@@ -48,3 +48,10 @@
 - [x] 2026-04-19: Task 3 completed — added the shared frontend API client, localStorage-backed session store, and refresh-once retry coverage for authenticated requests.
 - [x] 2026-04-19: Task 2 completed — initialized `packages/web` with Vite, React, Tailwind, Recharts, Vitest, and browser API shims for jsdom-based tests.
 - [x] 2026-04-19: Task 1 completed — split the monorepo TypeScript and validation wiring so `packages/server` and `packages/web` type-check and validate independently.
+
+## Bug Fixes (Post-Phase 4)
+**Status**: ✅ Done
+
+- [x] 2026-04-19: Issue #5/#6 fixed — created `packages/web/.env` with `VITE_API_BASE_URL=http://localhost:3000`; without it frontend sent API requests to Vite dev server (5173) instead of backend (3000)
+- [x] 2026-04-19: Issue #7/#8 fixed — added CORS middleware (`hono/cors`) to `packages/server/src/app.ts` allowing `http://localhost:5173` origin with credentials; browser cross-origin requests were being blocked
+- [x] 2026-04-19: Issue #9/#10 fixed — Auth.tsx had isSubmitting state bug where error during registration submission caused navigate() to be called with undefined path; added auth-level error response for `GET /profile` failures and proper error handling in routeFromProfile()
