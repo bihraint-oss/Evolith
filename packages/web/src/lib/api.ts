@@ -81,8 +81,7 @@ function getApiBaseUrl(override: string | undefined): string {
 }
 
 function buildUrl(baseUrl: string, path: string): string {
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${baseUrl}${normalizedPath}`;
+  return path.startsWith("/") ? `${baseUrl}${path}` : `${baseUrl}/${path}`;
 }
 
 function isApiSuccessResponse<TData>(
