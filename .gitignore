@@ -10,6 +10,8 @@ dist/
 .env.bak
 .env.local
 .env.*.local
+# Exception: web package .env contains only non-secret URL config
+!packages/web/.env
 
 # IDE
 .vscode/

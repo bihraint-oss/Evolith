@@ -52,11 +52,13 @@ function createProgressIndex(
 }
 
 function createCompletedSkillIdSet(progressRows: UserProgressRow[]): Set<string> {
-  return new Set(
-    progressRows
-      .filter((progressRow) => progressRow.status === "completed")
-      .map((progressRow) => progressRow.skillNodeId),
-  );
+  const result = new Set<string>();
+  for (const { skillNodeId, status } of progressRows) {
+    if (status === "completed") {
+      result.add(skillNodeId);
+    }
+  }
+  return result;
 }
 
 /**
@@ -79,16 +81,15 @@ function deriveSkillStatus(
     return "inProgress";
   }
 
-  // User must complete diagnosis before any skills become available
   if (!hasCompletedDiagnosis) {
     return "locked";
   }
 
-  return skillNode.prerequisites.every((prerequisiteId) =>
-    completedSkillIds.has(prerequisiteId),
-  )
-    ? "available"
-    : "locked";
+  const allPrerequisitesMet = skillNode.prerequisites.every((id) =>
+    completedSkillIds.has(id),
+  );
+
+  return allPrerequisitesMet ? "available" : "locked";
 }
 
 /**
