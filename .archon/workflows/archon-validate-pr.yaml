@@ -84,14 +84,14 @@ nodes:
     command: archon-validate-pr-code-review-main
     depends_on: [fetch-pr, resolve-paths]
     context: fresh
-    provider: claude
+    provider: codex
     model: sonnet
 
   - id: code-review-feature
     command: archon-validate-pr-code-review-feature
     depends_on: [fetch-pr, resolve-paths, code-review-main]
     context: fresh
-    provider: claude
+    provider: codex
     model: sonnet
 
   # ═══════════════════════════════════════════════════════════════
@@ -119,7 +119,7 @@ nodes:
       Consider: even if a change is backend, if it affects what the frontend displays
       (e.g., API response format changes, SSE event changes), it IS e2e_testable.
     depends_on: [fetch-pr]
-    provider: claude
+    provider: codex
     model: haiku
     allowed_tools: []
     output_format:
@@ -214,5 +214,5 @@ nodes:
     depends_on: [code-review-main, code-review-feature, e2e-test-main, e2e-test-feature, classify-testability, cleanup-processes]
     trigger_rule: all_done
     context: fresh
-    provider: claude
+    provider: codex
     model: sonnet

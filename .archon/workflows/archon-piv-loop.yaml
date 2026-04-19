@@ -302,7 +302,7 @@ nodes:
   # ═══════════════════════════════════════════════════════════════
 
   - id: refine-plan
-    provider: claude
+    provider: codex
     model: sonnet
     depends_on: [create-plan]
     loop:
@@ -546,7 +546,7 @@ nodes:
   # ═══════════════════════════════════════════════════════════════
 
   - id: code-review
-    provider: claude
+    provider: codex
     model: sonnet
     depends_on: [implement]
     context: fresh
@@ -705,7 +705,7 @@ nodes:
   # ═══════════════════════════════════════════════════════════════
 
   - id: finalize
-    provider: claude
+    provider: codex
     model: sonnet
     depends_on: [fix-feedback]
     context: fresh

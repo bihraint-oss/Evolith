@@ -263,4 +263,49 @@ describe("createApp auth smoke tests", () => {
       context.cleanup();
     }
   });
+
+  test("CORS headers are present on cross-origin request", async () => {
+    const context = createTestAppContext();
+
+    try {
+      const response = await context.app.request("/api/health", {
+        method: "GET",
+        headers: {
+          "Origin": "http://localhost:5173",
+        },
+      });
+
+      expect(response.headers.get("Access-Control-Allow-Origin")).toBe(
+        "http://localhost:5173",
+      );
+      expect(response.headers.get("Access-Control-Allow-Credentials")).toBe(
+        "true",
+      );
+    } finally {
+      context.cleanup();
+    }
+  });
+
+  test("CORS preflight OPTIONS request succeeds", async () => {
+    const context = createTestAppContext();
+
+    try {
+      const response = await context.app.request("/api/health", {
+        method: "OPTIONS",
+        headers: {
+          "Origin": "http://localhost:5173",
+          "Access-Control-Request-Method": "GET",
+          "Access-Control-Request-Headers": "content-type",
+        },
+      });
+
+      expect(response.status).toBe(204);
+      expect(response.headers.get("Access-Control-Allow-Origin")).toBe(
+        "http://localhost:5173",
+      );
+      expect(response.headers.get("Access-Control-Allow-Methods")).toBeDefined();
+    } finally {
+      context.cleanup();
+    }
+  });
 });

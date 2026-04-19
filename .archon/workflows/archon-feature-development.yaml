@@ -12,7 +12,7 @@ nodes:
 
   - id: create-pr
     command: archon-create-pr
-    provider: claude
+    provider: codex
     model: sonnet
     depends_on: [implement]
     context: fresh

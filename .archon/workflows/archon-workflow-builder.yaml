@@ -62,7 +62,7 @@ nodes:
 
       Be specific and concrete. Each proposed node should have a clear type
       (bash, prompt, command, or loop) and a one-line description of what it does.
-    provider: claude
+    provider: codex
     model: haiku
     allowed_tools: []
     output_format:
@@ -110,7 +110,7 @@ nodes:
         NOT for: ...
 
       # Optional top-level settings:
-      # provider: claude    (or codex)
+      # provider: codex    (or codex)
       # model: sonnet       (or haiku, opus, etc.)
       # interactive: true   (forces foreground execution in web UI)
 
@@ -222,6 +222,6 @@ nodes:
          - Trigger phrases that will invoke it
          - How to run it: `bun run cli workflow run $extract-intent.output.workflow_name "your input"`
          - How to test it: `bun run cli validate workflows $extract-intent.output.workflow_name`
-    provider: claude
+    provider: codex
     model: sonnet
     depends_on: [validate-yaml]

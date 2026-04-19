@@ -13,7 +13,7 @@ nodes:
   # =================================================================
 
   - id: extract-issue-number
-    provider: claude
+    provider: codex
     model: haiku
     prompt: |
       Find the GitHub issue number for this request.
@@ -38,7 +38,7 @@ nodes:
     depends_on: [extract-issue-number]
 
   - id: classify
-    provider: claude
+    provider: codex
     model: haiku
     prompt: |
       You are an issue classifier. Analyze the GitHub issue below and determine its type.
@@ -129,7 +129,7 @@ nodes:
   # =================================================================
 
   - id: validate
-    provider: claude
+    provider: codex
     model: sonnet
     command: archon-validate
     depends_on: [implement]
@@ -140,7 +140,7 @@ nodes:
   # =================================================================
 
   - id: create-pr
-    provider: claude
+    provider: codex
     model: sonnet
     prompt: |
       Create a draft pull request for the current branch.
@@ -181,14 +181,14 @@ nodes:
   # =================================================================
 
   - id: review-scope
-    provider: claude
+    provider: codex
     model: sonnet
     command: archon-pr-review-scope
     depends_on: [create-pr]
     context: fresh
 
   - id: review-classify
-    provider: claude
+    provider: codex
     model: haiku
     prompt: |
       You are a PR review classifier. Analyze the PR scope and determine
@@ -244,14 +244,14 @@ nodes:
 
   # Review agents — GLM reviews (Builder ≠ Reviewer)
   - id: code-review
-    provider: claude
+    provider: codex
     model: sonnet
     command: archon-code-review-agent
     depends_on: [review-classify]
     context: fresh
 
   - id: error-handling
-    provider: claude
+    provider: codex
     model: sonnet
     command: archon-error-handling-agent
     depends_on: [review-classify]
@@ -259,7 +259,7 @@ nodes:
     context: fresh
 
   - id: test-coverage
-    provider: claude
+    provider: codex
     model: sonnet
     command: archon-test-coverage-agent
     depends_on: [review-classify]
@@ -267,7 +267,7 @@ nodes:
     context: fresh
 
   - id: comment-quality
-    provider: claude
+    provider: codex
     model: sonnet
     command: archon-comment-quality-agent
     depends_on: [review-classify]
@@ -275,7 +275,7 @@ nodes:
     context: fresh
 
   - id: docs-impact
-    provider: claude
+    provider: codex
     model: sonnet
     command: archon-docs-impact-agent
     depends_on: [review-classify]
@@ -287,7 +287,7 @@ nodes:
   # =================================================================
 
   - id: synthesize
-    provider: claude
+    provider: codex
     model: sonnet
     command: archon-synthesize-review
     depends_on: [code-review, error-handling, test-coverage, comment-quality, docs-impact]
@@ -315,7 +315,7 @@ nodes:
   # =================================================================
 
   - id: report
-    provider: claude
+    provider: codex
     model: sonnet
     command: archon-issue-completion-report
     depends_on: [simplify]

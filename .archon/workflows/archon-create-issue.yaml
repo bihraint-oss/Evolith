@@ -49,7 +49,7 @@ nodes:
         If no explicit steps given, infer the most likely way to trigger the issue.
 
       Provide reasoning for your classification.
-    provider: claude
+    provider: codex
     model: haiku
     allowed_tools: []
     output_format:
@@ -476,7 +476,7 @@ nodes:
 
       Do NOT create a GitHub issue. The purpose of this node is to communicate back to the
       user so they can provide better information or investigate manually.
-    provider: claude
+    provider: codex
     model: sonnet
     depends_on: [check-reproduction]
     when: "$check-reproduction.output == 'NOT_REPRODUCED'"
@@ -553,7 +553,7 @@ nodes:
       7. Write a one-line suggested title to `$ARTIFACTS_DIR/.issue-title`
 
       8. Write suggested labels (comma-separated) to `$ARTIFACTS_DIR/.issue-labels`
-    provider: claude
+    provider: codex
     model: sonnet
     depends_on: [check-reproduction, fetch-template, dedup-check, investigate]
     when: "$check-reproduction.output != 'NOT_REPRODUCED'"
@@ -599,7 +599,7 @@ nodes:
          - Labels applied
          - Whether duplicates were found
          - Summary of reproduction results (reproduced/partial)
-    provider: claude
+    provider: codex
     model: sonnet
     depends_on: [draft-issue]
     context: fresh
