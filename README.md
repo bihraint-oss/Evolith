@@ -27,9 +27,9 @@ The default `.env.example` values:
 
 - start the API on `http://localhost:3000`
 - store SQLite data at `packages/server/dev.db`
-- set `VITE_API_BASE_URL=http://localhost:3000/api` for the web app
+- set `VITE_API_BASE_URL=http://localhost:3000` for the web app
 
-The repo-root `.env` is loaded when you use the root scripts such as `bun run dev:server` and `bun run dev:web`. If you run Vite directly inside `packages/web`, provide the same `VITE_API_BASE_URL` in that shell or in `packages/web/.env.local`.
+The repo-root `.env` is loaded when you use the root scripts such as `bun run dev:server` and `bun run dev:web`. If you run Vite directly inside `packages/web`, copy `packages/web/.env.example` to `packages/web/.env` to configure the API URL.
 
 ## Run
 
