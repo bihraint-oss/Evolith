@@ -52,13 +52,11 @@ function createProgressIndex(
 }
 
 function createCompletedSkillIdSet(progressRows: UserProgressRow[]): Set<string> {
-  const result = new Set<string>();
-  for (const { skillNodeId, status } of progressRows) {
-    if (status === "completed") {
-      result.add(skillNodeId);
-    }
-  }
-  return result;
+  return new Set(
+    progressRows
+      .filter(({ status }) => status === "completed")
+      .map(({ skillNodeId }) => skillNodeId),
+  );
 }
 
 /**

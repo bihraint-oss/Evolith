@@ -305,7 +305,7 @@ nodes:
   # ─── Phase 4: Report ─────────────────────────────────────────────────
   - id: report
     depends_on: [adversarial-sprint]
-    provider: claude
+    provider: codex
     model: haiku
     trigger_rule: all_done
     context: fresh

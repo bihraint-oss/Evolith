@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import type { Logger } from "pino";
 
 import type { AppDatabase } from "./db/client";
@@ -28,6 +29,11 @@ export function createApp(dependencies: AppDependencies = {}): Hono {
       "createApp requires both db and tokenService to enable auth routes",
     );
   }
+
+  app.use("*", cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }));
 
   app.use("*", createRequestLogger(logger));
 

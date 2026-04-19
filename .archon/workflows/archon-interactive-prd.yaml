@@ -236,7 +236,7 @@ nodes:
   # ═══════════════════════════════════════════════════════════════
 
   - id: validate
-    provider: claude
+    provider: codex
     model: sonnet
     prompt: |
       You are a technical validator checking a PRD for accuracy.

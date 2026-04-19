@@ -1,5 +1,6 @@
 import type { EntityId } from "@evolith/shared";
 import type { Context, MiddlewareHandler } from "hono";
+import type { Logger } from "pino";
 
 import type { TokenService } from "../lib/auth/tokens";
 import { InvalidAuthTokenError } from "../lib/auth/tokens";
@@ -21,6 +22,14 @@ export interface AuthContextBindings {
 
 export interface AuthMiddlewareOptions {
   tokenService: Pick<TokenService, "verifyAccessToken">;
+  logger?: Logger;
+}
+
+function serializeError(error: unknown): { message: string; name?: string } {
+  if (error instanceof Error) {
+    return { name: error.name, message: error.message };
+  }
+  return { message: String(error) };
 }
 
 export function extractBearerToken(
@@ -70,6 +79,14 @@ export function createAuthMiddleware(
       if (error instanceof InvalidAuthTokenError) {
         return errorResponse(context, "Invalid access token", 401, "invalid_token");
       }
+
+      options.logger?.error(
+        {
+          event: "auth.middleware_error",
+          error: serializeError(error),
+        },
+        "Unexpected error in auth middleware",
+      );
 
       return errorResponse(context, "Invalid access token", 401, "invalid_token");
     }
