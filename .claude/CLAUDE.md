@@ -85,7 +85,7 @@ Update memory files automatically when any of these triggers fire:
 - Migrations (packages/server/src/db/migrations/)
 
 ### What NEVER Gets Committed
-- `.env` files (secrets)
+- `.env` files containing secrets; non-secret URL configs (e.g., `VITE_API_BASE_URL`) may be committed when justified (see packages/web/.env for precedent)
 - `node_modules/`
 - Build output (`dist/`)
 - Database files (`*.db`)
