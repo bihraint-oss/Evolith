@@ -1,3 +1,57 @@
+## Task 9: UPDATE `.claude/memory/PROGRESS.md` — COMPLETED
+Date: 2026-04-19
+Files: .claude/memory/PROGRESS.md, .claude/memory/DECISIONS.md, .claude/memory/DETAILS.md, .claude/memory/INDEX.md, .claude/memory/TODOS.md
+Commit: 74fcb59
+---
+
+## Task 8: UPDATE `README.md` — COMPLETED
+Date: 2026-04-19
+Files: README.md
+Commit: 5020ce7
+---
+
+## Task 7: CREATE `packages/web/src/App.tsx` — COMPLETED
+Date: 2026-04-19
+Files: packages/web/src/App.tsx, packages/web/src/components/ProtectedRoute.tsx, packages/web/src/components/AppShell.tsx, packages/web/src/App.test.tsx, packages/web/src/main.tsx
+Commit: 4807700
+---
+
+## Task 6: CREATE `packages/web/src/pages/Dashboard.tsx` — COMPLETED
+Date: 2026-04-19
+Files: packages/web/src/components/RadarChart.tsx, packages/web/src/components/SkillMap.tsx, packages/web/src/pages/Dashboard.tsx, packages/web/src/pages/Dashboard.test.tsx
+Commit: d1dd1ad
+---
+
+## Task 5: CREATE `packages/web/src/pages/Diagnosis.tsx` — COMPLETED
+Date: 2026-04-19
+Files: packages/web/src/pages/Diagnosis.tsx, packages/web/src/pages/Diagnosis.test.tsx
+Commit: 3d1806e
+---
+
+## Task 4: CREATE `packages/web/src/pages/Auth.tsx` — COMPLETED
+Date: 2026-04-19
+Files: packages/web/src/lib/session.tsx, packages/web/src/pages/Auth.tsx, packages/web/src/pages/Auth.test.tsx
+Commit: 1aac76e
+---
+
+## Task 3: CREATE `packages/web/src/lib/api.ts` — COMPLETED
+Date: 2026-04-19
+Files: packages/web/src/lib/api.ts, packages/web/src/lib/api.test.ts, packages/web/src/lib/session.tsx
+Commit: 71e8a08
+---
+
+## Task 2: CREATE `packages/web/package.json` — COMPLETED
+Date: 2026-04-19
+Files: bun.lock, packages/web/package.json, packages/web/tsconfig.json, packages/web/tsconfig.node.json, packages/web/vite.config.ts, packages/web/tailwind.config.ts, packages/web/postcss.config.mjs, packages/web/index.html, packages/web/src/vite-env.d.ts, packages/web/src/main.tsx, packages/web/src/index.css, packages/web/src/test/setup.ts
+Commit: e400ac4
+---
+
+## Task 1: UPDATE `package.json` — COMPLETED
+Date: 2026-04-19
+Files: package.json, tsconfig.json, .env.example, packages/server/package.json, packages/server/tsconfig.json
+Commit: a7444e2
+---
+
 ## Task 4: CREATE `packages/server/src/routes/skills.test.ts` — COMPLETED
 Date: 2026-04-19
 Files: packages/server/src/routes/skills.test.ts

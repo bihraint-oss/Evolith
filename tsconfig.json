@@ -26,17 +26,6 @@
       "@evolith/shared/*": [
         "packages/shared/src/*"
       ]
-    },
-    "types": [
-      "bun-types"
-    ]
-  },
-  "include": [
-    "packages/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    ".build"
-  ]
+    }
+  }
 }
