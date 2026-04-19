@@ -112,11 +112,37 @@ export function AuthPage(): React.JSX.Element {
   }, [bootstrapAttempt, clearSession, navigate]);
 
   async function routeFromProfile(): Promise<void> {
-    const profile = await getProfile();
+    try {
+      const profile = await getProfile();
 
-    navigate(profile.hasCompletedDiagnosis ? "/dashboard" : "/diagnosis", {
-      replace: true,
-    });
+      navigate(profile.hasCompletedDiagnosis ? "/dashboard" : "/diagnosis", {
+        replace: true,
+      });
+    } catch (error) {
+      if (error instanceof ApiClientError && error.isAuthExpired) {
+        logErrorEvent("auth.route_profile_auth_expired", {
+          domain: "auth",
+          action: "routeProfile",
+          state: "auth_expired",
+          ...getErrorLogDetails(error),
+        });
+        clearSession();
+        setErrorMessage("Your session has expired. Please sign in again.");
+      } else {
+        logErrorEvent("auth.route_profile_error", {
+          domain: "auth",
+          action: "routeProfile",
+          state: "unknown_error",
+          ...getErrorLogDetails(error),
+        });
+        setErrorMessage(
+          getErrorMessage(
+            error,
+            "We could not load your profile. Please try again.",
+          ),
+        );
+      }
+    }
   }
 
   function updateField(

@@ -194,6 +194,50 @@ describe("AuthPage", () => {
     expect(screen.queryByText("Dashboard Page")).not.toBeInTheDocument();
   });
 
+  it("shows error and clears session when getProfile fails with auth expiration after register", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(createSuccessResponse(authResponse, 201))
+      .mockResolvedValueOnce(createErrorResponse("Token is invalid or expired.", 401, "auth_expired"))
+      .mockResolvedValueOnce(createErrorResponse("Refresh token expired.", 401, "auth_expired"));
+    const userActions = userEvent.setup();
+    const { SESSION_STORAGE_KEY } = await renderAuthPage({ fetchMock });
+
+    await userActions.type(screen.getByLabelText("Display name"), "Ada Lovelace");
+    await userActions.type(screen.getByLabelText("Email"), "ada@example.com");
+    await userActions.type(screen.getByLabelText("Password"), "password123");
+    await userActions.click(screen.getByRole("button", { name: "Create account" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Your session has expired. Please sign in again.",
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(localStorage.getItem(SESSION_STORAGE_KEY)).toBeNull();
+    expect(screen.queryByText("Diagnosis Page")).not.toBeInTheDocument();
+  });
+
+  it("shows error when getProfile fails with a network error after login", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(createSuccessResponse(authResponse))
+      // Simulate a network-level failure (non-Response thrown from fetch)
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"));
+
+    const userActions = userEvent.setup();
+    await renderAuthPage({ fetchMock });
+
+    await userActions.click(screen.getByRole("button", { name: "Log in" }));
+    await userActions.type(screen.getByLabelText("Email"), "ada@example.com");
+    await userActions.type(screen.getByLabelText("Password"), "password123");
+    await userActions.click(screen.getByRole("button", { name: "Sign in" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "The API request could not be completed.",
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(screen.queryByText("Dashboard Page")).not.toBeInTheDocument();
+  });
+
   it("redirects away from /auth when a stored session already exists", async () => {
     const fetchMock = vi
       .fn()
