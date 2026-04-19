@@ -1,6 +1,12 @@
-# Evolith Backend
+# Evolith
 
-Evolith provides a Bun workspace with a shared TypeScript package and a Hono API backed by SQLite + Drizzle. The current backend includes health and auth endpoints, authenticated `/api/profile` diagnosis routes, and authenticated `/api/skills` read endpoints that stay locked until diagnosis is complete.
+Evolith is a Bun monorepo for the MVP capability-evolution loop:
+
+- `packages/server`: Hono API with auth, profile, diagnosis, and skills routes
+- `packages/shared`: shared TypeScript DTOs used by both server and web
+- `packages/web`: React + Vite frontend for `/auth` -> `/diagnosis` -> `/dashboard`
+
+The current Phase 4 goal is a working browser flow backed by the existing API contracts, without adding new endpoints.
 
 ## Prerequisites
 
@@ -17,17 +23,35 @@ bun run db:migrate
 bun run db:seed
 ```
 
-The default `.env.example` values start the API on `http://localhost:3000` and store the SQLite database at `packages/server/dev.db`.
+The default `.env.example` values:
+
+- start the API on `http://localhost:3000`
+- store SQLite data at `packages/server/dev.db`
+- set `VITE_API_BASE_URL=http://localhost:3000/api` for the web app
+
+The repo-root `.env` is loaded when you use the root scripts such as `bun run dev:server` and `bun run dev:web`. If you run Vite directly inside `packages/web`, provide the same `VITE_API_BASE_URL` in that shell or in `packages/web/.env.local`.
 
 ## Run
 
-Start the server:
+Start the API in one shell:
 
 ```bash
 bun run dev:server
 ```
 
-In another shell, verify the health endpoint:
+Start the frontend in a second shell:
+
+```bash
+bun run dev:web
+```
+
+Then open the browser at the Vite URL, usually:
+
+```text
+http://localhost:5173/auth
+```
+
+You can still verify the API directly while the server is running:
 
 ```bash
 curl -sS http://localhost:3000/api/health
@@ -38,6 +62,18 @@ Expected shape:
 ```json
 {"data":{"status":"ok","service":"evolith-server","timestamp":"2026-04-18T00:00:00.000Z"}}
 ```
+
+## Browser Flow
+
+The MVP browser loop is:
+
+1. Open `/auth` and register or log in.
+2. The app stores the returned tokens and calls `GET /api/profile`.
+3. Users without a completed diagnosis are sent to `/diagnosis`.
+4. The diagnosis page resumes or creates the in-progress session, asks one question at a time, and redirects on completion.
+5. Completed users land on `/dashboard`, which renders the saved radar chart and the authored skill list in API order.
+
+Returning authenticated users are routed from `/auth` back to `/diagnosis` or `/dashboard` based on live profile state, not guessed client state.
 
 ## Auth Smoke Test
 
@@ -218,20 +254,40 @@ All API responses use one of these envelopes:
 
 ## Development Commands
 
-Run the test suite:
+Run the API:
 
 ```bash
-bun run test
+bun run dev:server
 ```
 
-Run the full validation script:
+Run the web app:
 
 ```bash
+bun run dev:web
+```
+
+Run package-local frontend validation:
+
+```bash
+bun run typecheck:web
+bun run build:web
+bun run test:web
+bun run validate:web
+```
+
+Run repo-wide validation:
+
+```bash
+bun run typecheck
+bun run lint
+bun run test
 bun run validate
 ```
 
-Regenerate SQL migrations after schema changes:
+Database utilities:
 
 ```bash
 bun run db:generate
+bun run db:migrate
+bun run db:seed
 ```

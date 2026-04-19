@@ -4,6 +4,20 @@ _Entries in reverse chronological order (newest first)._
 
 ---
 
+### D-009: Frontend routing is decided from live profile reads
+- **Date**: 2026-04-19
+- **Decision**: The browser flow uses `GET /api/profile` to choose between `/diagnosis` and `/dashboard` after auth success and when authenticated users enter either gated page.
+- **Rationale**: The backend is the source of truth for diagnosis completion and resumable state. Relying on cached client flags would risk sending completed users back into diagnosis or leaving incomplete users on the dashboard.
+- **Alternatives**: Persist a local `hasCompletedDiagnosis` flag and route from cache; always start/resume diagnosis without a profile pre-check.
+- **Impact**: `/auth` redirects only after a profile read, `/diagnosis` bounces completed users to `/dashboard`, and `/dashboard` redirects incomplete users back to `/diagnosis`.
+
+### D-008: Centralize token refresh and keep session state narrow
+- **Date**: 2026-04-19
+- **Decision**: The frontend owns one shared API client that parses envelopes, attaches bearer tokens, retries one `401` via `POST /api/auth/refresh`, and stores only `user` plus auth tokens in `localStorage`.
+- **Rationale**: The MVP has three protected routes and does not need a heavier state layer. Centralizing auth behavior keeps refresh logic consistent and prevents each page from implementing its own retry or token bookkeeping.
+- **Alternatives**: Refresh tokens separately inside each page load; add Redux or another global store for auth/session state.
+- **Impact**: `packages/web/src/lib/api.ts` handles refresh/replay semantics, `packages/web/src/lib/session.tsx` stays minimal, and UI code only needs to react to the surfaced auth-expired condition.
+
 ### D-007: Skills API returns derived status only
 - **Date**: 2026-04-19
 - **Decision**: `GET /api/skills` and `GET /api/skills/:id` expose seeded skill-node fields plus computed `status` only; they do not return `startedAt`, `completedAt`, or `score`.

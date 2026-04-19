@@ -37,5 +37,14 @@
 - [x] 2026-04-19: Task 1 completed — added shared skill graph DTOs in `packages/shared/src/types.ts` for the skills list/detail responses and `SkillNodeView`.
 
 ## Phase 4: Frontend
-**Status**: ⬜ Not started
-_(Tasks will be detailed when Phase 2+3 are complete)_
+**Status**: ✅ Done
+
+- [x] 2026-04-19: Task 9 completed — synced Phase 4 memory to the shipped frontend, documented the refresh-and-route decisions that govern the browser flow, refreshed frontend gotchas/TODOs, and closed the loop after validation.
+- [x] 2026-04-19: Task 8 completed — rewrote the README for full-stack setup, `VITE_API_BASE_URL`, local run flow, browser routing, and updated validation commands.
+- [x] 2026-04-19: Task 7 completed — composed the Vite app routes with a shared shell, token-based protected routes, localStorage bootstrap, and integration coverage for landing and guard behavior.
+- [x] 2026-04-19: Task 6 completed — added the dashboard page, Recharts radar wrapper, authored-order skill map, and coverage for redirects plus skill/radar rendering.
+- [x] 2026-04-19: Task 5 completed — added the diagnosis page with profile gating, resumable start behavior, sequential answering, completion redirects, and targeted page tests.
+- [x] 2026-04-19: Task 4 completed — added the combined auth page, persisted session bootstrap, profile-driven redirects, and auth flow coverage.
+- [x] 2026-04-19: Task 3 completed — added the shared frontend API client, localStorage-backed session store, and refresh-once retry coverage for authenticated requests.
+- [x] 2026-04-19: Task 2 completed — initialized `packages/web` with Vite, React, Tailwind, Recharts, Vitest, and browser API shims for jsdom-based tests.
+- [x] 2026-04-19: Task 1 completed — split the monorepo TypeScript and validation wiring so `packages/server` and `packages/web` type-check and validate independently.

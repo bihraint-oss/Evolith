@@ -3,20 +3,26 @@
   "private": true,
   "workspaces": [
     "packages/server",
-    "packages/shared"
+    "packages/shared",
+    "packages/web"
   ],
   "scripts": {
     "dev:server": "bun run --cwd packages/server dev",
-    "typecheck": "bun run --cwd packages/server typecheck",
+    "dev:web": "if [ -f packages/web/package.json ]; then bun run --cwd packages/web dev; else echo 'packages/web is not initialized yet'; fi",
+    "typecheck:web": "if [ -f packages/web/package.json ]; then bun run --cwd packages/web typecheck; else echo 'packages/web is not initialized yet'; fi",
+    "build:web": "if [ -f packages/web/package.json ]; then bun run --cwd packages/web build; else echo 'packages/web is not initialized yet'; fi",
+    "test:web": "if [ -f packages/web/package.json ]; then bun run --cwd packages/web test; else echo 'packages/web is not initialized yet'; fi",
+    "validate:web": "if [ -f packages/web/package.json ]; then bun run --cwd packages/web validate; else echo 'packages/web is not initialized yet'; fi",
+    "typecheck": "bun run --cwd packages/server typecheck && bun run typecheck:web",
     "type-check": "bun run typecheck",
-    "build": "bun run typecheck",
-    "lint": "bun run --cwd packages/server lint",
-    "test": "bun run --cwd packages/server test",
-    "format:check": "bun run --cwd packages/server format:check",
+    "build": "bun run --cwd packages/server typecheck && bun run build:web",
+    "lint": "bun run --cwd packages/server lint && if [ -f packages/web/package.json ]; then bun run --cwd packages/web lint; else echo 'packages/web is not initialized yet'; fi",
+    "test": "bun run --cwd packages/server test && bun run test:web",
+    "format:check": "bun run --cwd packages/server format:check && if [ -f packages/web/package.json ]; then bun run --cwd packages/web format:check; else echo 'packages/web is not initialized yet'; fi",
     "db:generate": "bun run --cwd packages/server db:generate",
     "db:migrate": "bun run --cwd packages/server db:migrate",
     "db:seed": "bun run --cwd packages/server db:seed",
-    "validate": "bun run --cwd packages/server validate"
+    "validate": "bun run typecheck && bun run lint && bun run test && bun run format:check"
   },
   "devDependencies": {
     "bun-types": "latest",

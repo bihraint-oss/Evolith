@@ -1,0 +1,38 @@
+{
+  "name": "@evolith/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project tsconfig.node.json --noEmit",
+    "build": "bun run typecheck && vite build",
+    "lint": "bun run typecheck",
+    "test": "vitest run --passWithNoTests",
+    "format:check": "echo 'No formatter configured yet'",
+    "validate": "bun run typecheck && bun run lint && bun run test && bun run format:check"
+  },
+  "dependencies": {
+    "@evolith/shared": "workspace:*",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-router-dom": "latest",
+    "recharts": "latest"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "latest",
+    "@testing-library/react": "latest",
+    "@testing-library/user-event": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@vitejs/plugin-react": "latest",
+    "autoprefixer": "latest",
+    "jsdom": "latest",
+    "postcss": "latest",
+    "tailwindcss": "3.4.17",
+    "typescript": "latest",
+    "vite": "latest",
+    "vitest": "latest"
+  }
+}
