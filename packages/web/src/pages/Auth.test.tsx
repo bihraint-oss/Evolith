@@ -238,6 +238,50 @@ describe("AuthPage", () => {
     expect(screen.queryByText("Dashboard Page")).not.toBeInTheDocument();
   });
 
+  it("shows error when getProfile fails with a server error after login", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(createSuccessResponse(authResponse))
+      // Simulate a 500 Internal Server Error from getProfile
+      .mockResolvedValueOnce(createErrorResponse("Internal server error", 500));
+
+    const userActions = userEvent.setup();
+    await renderAuthPage({ fetchMock });
+
+    await userActions.click(screen.getByRole("button", { name: "Log in" }));
+    await userActions.type(screen.getByLabelText("Email"), "ada@example.com");
+    await userActions.type(screen.getByLabelText("Password"), "password123");
+    await userActions.click(screen.getByRole("button", { name: "Sign in" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Internal server error",
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(screen.queryByText("Dashboard Page")).not.toBeInTheDocument();
+  });
+
+  it("shows error when getProfile fails with a non-auth_expired 401 after register", async () => {
+    // Flow: register -> profile (401 "Invalid token.") -> refresh -> retry profile (401 "Invalid token.")
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(createSuccessResponse(authResponse, 201)) // register
+      .mockResolvedValueOnce(createErrorResponse("Invalid token.", 401, "invalid_token")) // profile -> 401
+      .mockResolvedValueOnce(createSuccessResponse(authResponse)) // refresh -> success with new tokens
+      .mockResolvedValueOnce(createErrorResponse("Invalid token.", 401, "invalid_token")); // retry profile -> 401
+
+    const userActions = userEvent.setup();
+    await renderAuthPage({ fetchMock });
+
+    await userActions.type(screen.getByLabelText("Display name"), "Ada Lovelace");
+    await userActions.type(screen.getByLabelText("Email"), "ada@example.com");
+    await userActions.type(screen.getByLabelText("Password"), "password123");
+    await userActions.click(screen.getByRole("button", { name: "Create account" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Invalid token.");
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+    expect(screen.queryByText("Diagnosis Page")).not.toBeInTheDocument();
+  });
+
   it("redirects away from /auth when a stored session already exists", async () => {
     const fetchMock = vi
       .fn()
